@@ -12,13 +12,10 @@ import sys
 app = Flask(__name__)
 api_accessor = ApiAccessor.create()
 
-FETCHING_TOOLS = ['curl', 'Wget']
-
 @app.route('/')
 @app.route('/<section>', methods=['GET'])
 def index(section='home'):
-    print request.user_agent
-    if any([tool in str(request.user_agent) for tool in FETCHING_TOOLS]):
+    if 'curl' in str(request.user_agent):
         return str(api_accessor.fetch(section=section))
     elif section == 'home':
         return redirect('http://www.nytimes.com', code=302)
