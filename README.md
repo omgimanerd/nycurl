@@ -1,9 +1,10 @@
 # nycurl
 
 This is a web server that formats the latest news from the front page of the
-New York Times into a format that can be displayed in Terminal. You can fetch
-the latest news simply by typing
+New York Times into a format that can be displayed in most terminals.
 
+## Usage
+You can fetch the latest news simply by typing  
 ```bash
 curl nycurl.herokuapp.com
 ```
