@@ -11,11 +11,11 @@ var URL_SHORTENER_API_KEY = process.env.URL_SHORTENER_API_KEY;
 
 // Dependencies.
 var assert = require('assert');
-var async = require('async');
 var colors = require('colors');
 var express = require('express');
 var http = require('http');
 var morgan = require('morgan');
+var winston = require('winston');
 
 var ApiAccessor = require('./lib/ApiAccessor');
 var DataFormatter = require('./lib/DataFormatter')
@@ -24,23 +24,32 @@ var DataFormatter = require('./lib/DataFormatter')
 var app = express();
 var server = http.Server(app);
 var apiAccessor = ApiAccessor.create(NYTIMES_API_KEY, URL_SHORTENER_API_KEY);
+var logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.File)({ filename: 'logfile.log' })
+  ]
+});
 
 app.set('port', PORT_NUMBER);
 app.use(morgan(':date[web] :method :url :req[header] :remote-addr :status'));
 
 app.use('/:section?', function(request, response) {
   var userAgent = request.headers['user-agent'];
-  var section = request.params.section;
+  var section = request.params.section || 'home';
+
+  logger.info(userAgent + ' ' + request.ip + ' /' + section);
   if (userAgent.indexOf('curl') != -1) {
     apiAccessor.fetch(section, function(error, results) {
       if (error) {
-        response.send(error.toString().red);
+        logger.info('ERROR: ' + error);
+        response.send("An error occurred. Please try again later. ".red +
+                      "(Most likely we hit our rate limit)".red);
       } else {
         response.send(DataFormatter.format(results));
       }
     });
   } else {
-    if (section) {
+    if (section != 'home') {
       response.redirect('http://www.nytimes.com/pages/' + section);
     } else {
       response.redirect('http://www.nytimes.com');

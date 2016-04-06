@@ -22,7 +22,8 @@
     "colors": "^1.1.2",
     "express": "^4.13.4",
     "morgan": "^1.7.0",
-    "request": "^2.70.0"
+    "request": "^2.70.0",
+    "winston": "^2.2.0"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
