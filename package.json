@@ -1,0 +1,30 @@
+{
+  "name": "nycurl",
+  "version": "1.0.0",
+  "description": "A web server that fetches data from the New York Times and formats it for display in the terminal.",
+  "main": "server.js",
+  "scripts": {
+    "test": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/omgimanerd/nycurl.git"
+  },
+  "author": "Alvin Lin (alvin.lin.dev@gmail.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/omgimanerd/nycurl/issues"
+  },
+  "homepage": "https://github.com/omgimanerd/nycurl#readme",
+  "dependencies": {
+    "cli-table": "^0.3.1",
+    "colors": "^1.1.2",
+    "express": "^4.13.4",
+    "morgan": "^1.7.0",
+    "request": "^2.70.0"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-gjslint": "^0.1.5"
+  }
+}

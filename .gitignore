@@ -1,3 +1,2 @@
-/environment
+/node_modules
 env
-*.pyc
