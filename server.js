@@ -34,27 +34,33 @@ app.use('/:section?', function(request, response) {
   if (userAgent.indexOf('curl') != -1) {
     apiAccessor.fetch(section, function(error, results) {
       if (error) {
-        response.send(error.toString().red);
+        response.send(error.toString());
         return;
       }
-      async.map(results, function(result, callback) {
-        apiAccessor.shortenUrl(result.url, function(error, shortenedUrl) {
+      try {
+        async.map(results, function(result, callback) {
+          apiAccessor.shortenUrl(result.url, function(error, shortenedUrl) {
+            if (error) {
+              callback(error, null);
+              return;
+            }
+            result.url = shortenedUrl;
+            callback(error, result);
+          });
+        }, function(error, results) {
           if (error) {
-            callback(error, null);
-            return;
+            response.send(
+              'An error occurred! Please try again later. ' +
+              '(We probably hit our rate limit)\n');
+          } else {
+            response.send(DataFormatter.format(results));
           }
-          result.url = shortenedUrl;
-          callback(error, result);
         });
-      }, function(error, results) {
-        if (error) {
-          response.send(
-            'An error occurred! Please try again later. ' +
-            '(We probably hit our rate limit)\n'.red);
-        } else {
-          response.send(DataFormatter.format(results));
-        }
-      });
+      } catch(exception) {
+        response.send(
+          'An error occurred! Please try again later. ' +
+          '(We probably hit our rate limit)\n'.red);
+      }
     });
   } else {
     if (section) {
