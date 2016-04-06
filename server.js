@@ -12,6 +12,7 @@ var URL_SHORTENER_API_KEY = process.env.URL_SHORTENER_API_KEY;
 // Dependencies.
 var assert = require('assert');
 var async = require('async');
+var colors = require('colors');
 var express = require('express');
 var http = require('http');
 var morgan = require('morgan');
@@ -31,18 +32,28 @@ app.use('/:section?', function(request, response) {
   var userAgent = request.headers['user-agent'];
   var section = request.params.section;
   if (userAgent.indexOf('curl') != -1) {
-    apiAccessor.fetch(section, function(results) {
+    apiAccessor.fetch(section, function(error, results) {
+      if (error) {
+        response.send(error.toString().red);
+        return;
+      }
       async.map(results, function(result, callback) {
-        apiAccessor.shortenUrl(result.url, function(shortenedUrl) {
+        apiAccessor.shortenUrl(result.url, function(error, shortenedUrl) {
+          if (error) {
+            callback(error, null);
+            return;
+          }
           result.url = shortenedUrl;
-          callback(null, result);
+          callback(error, result);
         });
       }, function(error, results) {
         if (error) {
           response.send(
-            'An error occurred! Please try again later.'.red);
+            'An error occurred! Please try again later. ' +
+            '(We probably hit our rate limit)\n'.red);
+        } else {
+          response.send(DataFormatter.format(results));
         }
-        response.send(DataFormatter.format(results));
       });
     });
   } else {
