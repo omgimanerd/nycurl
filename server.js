@@ -73,7 +73,8 @@ app.use('/:section?', function(request, response) {
 
 // Starts the server.
 server.listen(PORT_NUMBER, function() {
-  assert.notEqual(NYTIMES_API_KEY, undefined);
-  assert.notEqual(URL_SHORTENER_API_KEY, undefined);
+  if (!NYTIMES_API_KEY || !URL_SHORTENER_API_KEY) {
+    throw new Error('Cannot access API keys.')
+  }
   console.log('STARTING SERVER ON PORT ' + PORT_NUMBER);
 });
