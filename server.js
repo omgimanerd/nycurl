@@ -34,30 +34,9 @@ app.use('/:section?', function(request, response) {
   if (userAgent.indexOf('curl') != -1) {
     apiAccessor.fetch(section, function(error, results) {
       if (error) {
-        response.send(error.toString());
-        return;
-      }
-      try {
-        async.map(results, function(result, callback) {
-          apiAccessor.shortenUrl(result.url, function(error, shortenedUrl) {
-            if (error) {
-              callback(error, null);
-              return;
-            }
-            result.url = shortenedUrl;
-            callback(error, result);
-          });
-        }, function(error, results) {
-          if (error) {
-            response.send("Request error: We probably hit our rate limit. " +
-                          "Try again later.\n");
-          } else {
-            response.send(DataFormatter.format(results));
-          }
-        });
-      } catch(exception) {
-        response.send("An unknown error occurred, contact me @ " +
-                      " alvin.lin.dev@gmail.com\n");
+        response.send(error.toString().red);
+      } else {
+        response.send(DataFormatter.format(results));
       }
     });
   } else {
