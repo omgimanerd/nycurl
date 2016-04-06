@@ -37,7 +37,8 @@ app.use('/:section?', function(request, response) {
   var userAgent = request.headers['user-agent'];
   var section = request.params.section || 'home';
 
-  logger.info(userAgent + ' ' + request.ip + ' /' + section);
+  logger.info(userAgent + ' ' + request.method + ' ' + request.path + ' ' +
+	      request.ip);
   if (userAgent.indexOf('curl') != -1) {
     apiAccessor.fetch(section, function(error, results) {
       if (error) {
