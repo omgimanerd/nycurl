@@ -49,17 +49,15 @@ app.use('/:section?', function(request, response) {
           });
         }, function(error, results) {
           if (error) {
-            response.send(
-              'An error occurred! Please try again later. ' +
-              '(We probably hit our rate limit)\n');
+            response.send("Request error: We probably hit our rate limit. " +
+                          "Try again later.\n");
           } else {
             response.send(DataFormatter.format(results));
           }
         });
       } catch(exception) {
-        response.send(
-          'An error occurred! Please try again later. ' +
-          '(We probably hit our rate limit)\n'.red);
+        response.send("An unknown error occurred, contact me @ " +
+                      " alvin.lin.dev@gmail.com\n");
       }
     });
   } else {
