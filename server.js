@@ -6,20 +6,23 @@
 // Constants
 var IP = process.env.IP || 'localhost';
 var PORT_NUMBER = process.env.PORT || 5000;
-var API_KEY = process.env.NYTIMES_TOP_STORIES_API_KEY;
+var NYTIMES_API_KEY = process.env.NYTIMES_API_KEY;
+var URL_SHORTENER_API_KEY = process.env.URL_SHORTENER_API_KEY;
 
 // Dependencies.
 var assert = require('assert');
+var async = require('async');
 var express = require('express');
 var http = require('http');
 var morgan = require('morgan');
 
 var ApiAccessor = require('./lib/ApiAccessor');
+var DataFormatter = require('./lib/DataFormatter')
 
 // Initialization.
 var app = express();
 var server = http.Server(app);
-var apiAccessor = ApiAccessor.create(API_KEY);
+var apiAccessor = ApiAccessor.create(NYTIMES_API_KEY, URL_SHORTENER_API_KEY);
 
 app.set('port', PORT_NUMBER);
 app.use(morgan(':date[web] :method :url :req[header] :remote-addr :status'));
@@ -28,8 +31,19 @@ app.use('/:section?', function(request, response) {
   var userAgent = request.headers['user-agent'];
   var section = request.params.section;
   if (userAgent.indexOf('curl') != -1) {
-    apiAccessor.fetch(section, function(data) {
-      response.send(data);
+    apiAccessor.fetch(section, function(results) {
+      async.map(results, function(result, callback) {
+        apiAccessor.shortenUrl(result.url, function(shortenedUrl) {
+          result.url = shortenedUrl;
+          callback(null, result);
+        });
+      }, function(error, results) {
+        if (error) {
+          response.send(
+            'An error occurred! Please try again later.'.red);
+        }
+        response.send(DataFormatter.format(results));
+      });
     });
   } else {
     if (section) {
@@ -42,6 +56,7 @@ app.use('/:section?', function(request, response) {
 
 // Starts the server.
 server.listen(PORT_NUMBER, function() {
-  assert.notEqual(API_KEY, undefined);
+  assert.notEqual(NYTIMES_API_KEY, undefined);
+  assert.notEqual(URL_SHORTENER_API_KEY, undefined);
   console.log('STARTING SERVER ON PORT ' + PORT_NUMBER);
 });

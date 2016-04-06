@@ -12,10 +12,13 @@ curl nycurl.herokuapp.com
 ## Setup
 Acquire a Top Stories API Key from the
 [New York Times](http://developer.nytimes.com).
+Acquire a URL Shortener API Key from
+[Google Developers](https://console.developers.google.com)
 
 Add this line to your .bashrc or environment configuration:
 ```bash
-export NYTIMES_TOP_STORIES_API_KEY=YOUR_KEY_HERE
+export NYTIMES_API_KEY=YOUR_KEY_HERE
+export URL_SHORTENER_API_KEY=YOUR_KEY_HERE
 ```
 
 To set up the project:
