@@ -1,0 +1,61 @@
+/**
+ * Base stylesheet
+ * Author: alvin.lin.dev@gmail.com (Alvin Lin)
+ */
+
+@fontface {
+  font-family: UbuntuMono;
+  src: url('/public/bower/ubuntu-font/ubuntumono-bi.ttf');
+}
+
+html, body {
+  width: 100%;
+  min-width: 1080px;
+  height: 100%;
+  min-height: 760px;
+  margin: 0;
+  border: 0;
+  padding: 0;
+
+  font-size: 16px;
+  font-family: UbuntuMono, monospace, sans-serif;
+  background-color: #300A24;
+  color: #FFFFFF;
+}
+
+table {
+  width: 800px;
+  margin: 10px auto;
+  border: 2px solid grey;
+  border-collapse: collapse;
+}
+
+table td {
+  vertical-align: top;
+  border: 2px solid grey;
+  padding: 15px;
+}
+
+.section {
+  color: #06989A;
+}
+
+.title {
+  color: #34E2E2;
+}
+
+.url a, .url a:visited {
+  color: #4E9A06;
+  border-bottom: 1px solid #4E9A06;
+  text-decoration: none;
+}
+
+.url a:hover {
+  border-bottom: 2px solid #4E9A06;
+}
+
+.incognito {
+  color: #4E9A06;
+  text-align: center;
+  margin-bottom: 25px;
+}

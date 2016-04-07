@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>NY Curl</title>
+    <link rel="stylesheet" href="/public/css/index.css" />
+  </head>
+
+  <body>
+    {% if error %}
+      <div class="error">
+        An error occurred! We most likely hit our rate limit. Try again later.
+      </div>
+      {% else %}
+        <table>
+        {% for value in data %}
+        <tr>
+          <td class="section">
+            {{ value.section }}
+          </td>
+          <td>
+            <div class="title">
+              {{ value.title }}
+            </div>
+            <div class="abstract">
+              {{ value.abstract }}
+            </div>
+            <div class="url">
+              <a href="{{ value.url }}">{{ value.url }}</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+    <div class='incognito'>
+      If you are asked to subscribe to view the articles, open them in
+      incognito mode.
+    </div>
+
+  </body>
+</html>

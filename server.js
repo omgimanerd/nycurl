@@ -15,6 +15,7 @@ var colors = require('colors');
 var express = require('express');
 var http = require('http');
 var morgan = require('morgan');
+var swig = require('swig');
 var winston = require('winston');
 
 var ApiAccessor = require('./lib/ApiAccessor');
@@ -30,8 +31,15 @@ var logger = new (winston.Logger)({
   ]
 });
 
+app.engine('html', swig.renderFile);
+
 app.set('port', PORT_NUMBER);
+
+app.set('view engine', 'html');
+
 app.use(morgan(':date[web] :method :url :req[header] :remote-addr :status'));
+
+app.use('/public', express.static(__dirname + '/public'));
 
 app.use('/:section?', function(request, response) {
   var userAgent = request.headers['user-agent'];
@@ -39,23 +47,32 @@ app.use('/:section?', function(request, response) {
 
   logger.info(userAgent + ' ' + request.method + ' ' + request.path + ' ' +
 	      request.ip);
-  if (userAgent.indexOf('curl') != -1) {
-    apiAccessor.fetch(section, function(error, results) {
-      if (error) {
-        logger.info('ERROR: ' + error);
+
+  apiAccessor.fetch(section, function(error, results) {
+    var isCurl = userAgent.indexOf('curl') != -1;
+    if (error) {
+      logger.info('ERROR: ' + error);
+      if (isCurl) {
         response.send("An error occurred. Please try again later. ".red +
-                      "(Most likely we hit our rate limit)".red);
+                      "(Most likely we hit our rate limit)\n".red);
       } else {
-        response.send(DataFormatter.format(results));
+        response.render('index.html', {
+          error: true,
+          data: null
+        });
       }
-    });
-  } else {
-    if (section != 'home') {
-      response.redirect('http://www.nytimes.com/pages/' + section);
     } else {
-      response.redirect('http://www.nytimes.com');
+      if (isCurl) {
+        response.send(DataFormatter.format(results) +
+                      DataFormatter.INCOGNITO_SUGGESTION);
+      } else {
+        response.render('index.html', {
+          error: null,
+          data: results
+        });
+      }
     }
-  }
+  })
 });
 
 // Starts the server.
