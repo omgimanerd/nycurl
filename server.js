@@ -13,6 +13,7 @@ var URL_SHORTENER_API_KEY = process.env.URL_SHORTENER_API_KEY;
 var assert = require('assert');
 var colors = require('colors');
 var express = require('express');
+var favicon = require('serve-favicon');
 var http = require('http');
 var morgan = require('morgan');
 var swig = require('swig');
@@ -41,7 +42,9 @@ app.use(morgan(':date[web] :method :url :req[header] :remote-addr :status'));
 
 app.use('/public', express.static(__dirname + '/public'));
 
-app.use('/:section?', function(request, response) {
+app.use('/favicon.ico', favicon(__dirname + '/public/images/favicon.ico'))
+
+app.get('/:section?', function(request, response) {
   var userAgent = request.headers['user-agent'];
   var section = request.params.section || 'home';
 
