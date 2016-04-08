@@ -26,7 +26,7 @@ html, body {
 .error {
   color: #CC0219;
   text-align: center;
-  margin: 50px;
+  padding: 50px;
 }
 
 .articles {
