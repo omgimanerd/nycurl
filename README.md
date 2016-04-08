@@ -15,27 +15,27 @@ curl nycurl.herokuapp.com/technology
 curl nycurl.herokuapp.com/politics
 ```
 
-## Setup
-Acquire a Top Stories API Key from the
+## Contributing
+Fork this repository and send me a pull request with any suggestions and
+changes.
+Use two-space indents and camel-cased variables.
+
+You will need to acquire a Top Stories API Key from the
 [New York Times](http://developer.nytimes.com).
-Acquire a URL Shortener API Key from
+and a URL Shortener API Key from
 [Google Developers](https://console.developers.google.com)
 
-Add this line to your .bashrc or other environment variable configuration:
+Add them to your .bashrc or other environment variable configuration:
 ```bash
 export NYTIMES_API_KEY=YOUR_KEY_HERE
 export URL_SHORTENER_API_KEY=YOUR_KEY_HERE
 ```
 
-To set up the project:
+Install the project dependencies:
 ```
 npm install
+bower install
 ```
-
-## Contributing
-Fork this repository and send me a pull request with any suggestions and
-changes.
-Use two-space indents and camel-cased variables.
 
 ## License
 Copyright &copy; Alvin Lin 2016
