@@ -12,30 +12,40 @@
         An error occurred! We most likely hit our rate limit. Try again later.
       </div>
       {% else %}
-        <table>
-        {% for value in data %}
-        <tr>
-          <td class="section">
-            {{ value.section }}
-          </td>
-          <td>
-            <div class="title">
-              {{ value.title }}
-            </div>
-            <div class="abstract">
-              {{ value.abstract }}
-            </div>
-            <div class="url">
-              <a href="{{ value.url }}">{{ value.url }}</a>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </table>
-    {% endif %}
+        <table class="articles">
+          <tr>
+            <th>Section</th>
+            <th>Details</th>
+          </tr>
+          {% for value in data %}
+          <tr>
+            <td class="section">
+              {{ value.section }}
+            </td>
+            <td>
+              <div class="title">
+                {{ value.title }}
+              </div>
+              <div class="abstract">
+                {{ value.abstract }}
+              </div>
+              <div class="url">
+                <a href="{{ value.url }}">{{ value.url }}</a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+      {% endif %}
     <div class='incognito'>
       If you are asked to subscribe to view the articles, open them in
       incognito mode.
+    </div>
+    <div class='github'>
+      <iframe src="https://ghbtns.com/github-btn.html?user=omgimanerd&repo=nycurl&type=star&count=true&size=large"
+      frameborder="0" scrolling="0" width="160px" height="30px"></iframe>
+      <iframe src="https://ghbtns.com/github-btn.html?user=omgimanerd&type=follow&count=true&size=large"
+      frameborder="0" scrolling="0" width="220px" height="30px"></iframe>
     </div>
 
   </body>
