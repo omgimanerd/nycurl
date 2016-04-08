@@ -49,7 +49,7 @@ app.get('/:section?', function(request, response) {
   var section = request.params.section || 'home';
 
   logger.info(userAgent + ' ' + request.method + ' ' + request.path + ' ' +
-	      request.ip);
+      request.ip);
 
   apiAccessor.fetch(section, function(error, results) {
     var isCurl = userAgent.indexOf('curl') != -1;
