@@ -42,7 +42,9 @@ app.use(morgan(':date[web] :method :url :req[header] :remote-addr :status'));
 
 app.use('/public', express.static(__dirname + '/public'));
 
-app.use('/favicon.ico', favicon(__dirname + '/public/images/favicon.ico'))
+app.use('/favicon.ico', favicon(__dirname + '/public/images/favicon.ico'));
+
+app.use('/robots.txt', express.static(__dirname + '/robots.txt'));
 
 app.get('/:section?', function(request, response) {
   var userAgent = request.headers['user-agent'];
@@ -67,7 +69,8 @@ app.get('/:section?', function(request, response) {
     } else {
       if (isCurl) {
         response.send(DataFormatter.format(results) +
-                      DataFormatter.INCOGNITO_SUGGESTION);
+                      DataFormatter.INCOGNITO_SUGGESTION +
+                      DataFormatter.TWITTER_LINK);
       } else {
         response.render('index.html', {
           error: null,
