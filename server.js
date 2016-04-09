@@ -47,7 +47,7 @@ app.use('/favicon.ico', favicon(__dirname + '/public/images/favicon.ico'));
 app.use('/robots.txt', express.static(__dirname + '/robots.txt'));
 
 app.get('/:section?', function(request, response) {
-  var userAgent = request.headers['user-agent'];
+  var userAgent = request.headers['user-agent'] || '';
   var section = request.params.section || 'home';
 
   logger.info(userAgent + ' ' + request.method + ' ' + request.path + ' ' +
