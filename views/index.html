@@ -1,60 +1,74 @@
 <!DOCTYPE html>
 
 <html>
-  <head>
-    <title>NY Curl</title>
-    <link rel="stylesheet" href="/public/css/index.css" />
-    <link rel="icon" type="image/x-icon" href="/public/images/favicon.ico" />
-  </head>
+<head>
+  <title>NY Curl</title>
+  <link rel="stylesheet" href="/public/css/index.css" />
+  <link rel="icon" type="image/x-icon" href="/public/images/favicon.ico" />
+</head>
 
-  <body>
-    {% if error %}
-      <div class="error">
-        An error occurred! We most likely hit our rate limit. Try again later.
-      </div>
-      {% else %}
-        <table class="articles">
-          <tr>
-            <th>Section</th>
-            <th>Details</th>
-          </tr>
-          {% for value in data %}
-          <tr>
-            <td class="section">
-              {{ value.section }}
-            </td>
-            <td>
-              <div class="title">
-                {{ value.title }}
-              </div>
-              <div class="abstract">
-                {{ value.abstract }}
-              </div>
-              <div class="url">
-                <a href="{{ value.url }}">{{ value.url }}</a>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </table>
-      {% endif %}
-    <div class='incognito'>
-      If you are asked to subscribe to view the articles, open them in
-      incognito mode.
-    </div>
-    <div class='media'>
-      <a href="https://twitter.com/omgimanerd" class="twitter-follow-button"
-         data-show-count="true" data-show-screen-name="true">
-        Follow @omgimanerd
-      </a>
-      <iframe src="https://ghbtns.com/github-btn.html?user=omgimanerd&repo=nycurl&type=star&count=true"
-      frameborder="0" scrolling="0" width="80px" height="20px"></iframe>
-      <iframe src="https://ghbtns.com/github-btn.html?user=omgimanerd&type=follow&count=true"
-      frameborder="0" scrolling="0" width="220px" height="20px"></iframe>
-    </div>
+<body>
+  {% if error %}
+  <div class="error">
+    An error occurred! We most likely hit our rate limit. Try again later.
+  </div>
+  {% else %}
+  <table class="articles">
+    <tr>
+      <th>Section</th>
+      <th>Details</th>
+    </tr>
+    {% for value in data %}
+    <tr>
+      <td class="section">
+        {{ value.section }}
+      </td>
+      <td>
+        <div class="title">
+          {{ value.title }}
+        </div>
+        <div class="abstract">
+          {{ value.abstract }}
+        </div>
+        <div class="url">
+          <a href="{{ value.url }}">{{ value.url }}</a>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+  <div class='incognito'>
+    If you are asked to subscribe to view the articles, open them in
+    incognito mode.
+  </div>
+  <div class='media'>
+    <a href="https://twitter.com/omgimanerd" class="twitter-follow-button"
+    data-show-count="true" data-show-screen-name="true">
+      Follow @omgimanerd
+    </a>
+    <a class="github-button" href="https://github.com/omgimanerd"
+    data-style="mega" data-count-href="/omgimanerd/followers"
+    data-count-api="/users/omgimanerd#followers"
+    data-count-aria-label="# followers on GitHub"
+    aria-label="Follow @omgimanerd on GitHub">
+      Follow @omgimanerd
+    </a>
+    <a class="github-button" href="https://github.com/omgimanerd/nycurl"
+    data-icon="octicon-star" data-style="mega"
+    data-count-href="/omgimanerd/nycurl/stargazers"
+    data-count-api="/repos/omgimanerd/nycurl#stargazers_count" data-count-aria-label="# stargazers on GitHub"
+    aria-label="Star omgimanerd/nycurl on GitHub">
+      Star
+    </a>
+  </div>
 
-    <script>
-    !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');
-    </script>
-  </body>
+  <script>
+  !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');
+  </script>
+  <script async defer id="github-bjs"
+  src="https://buttons.github.io/buttons.js">
+  </script>
+</body>
+
 </html>
