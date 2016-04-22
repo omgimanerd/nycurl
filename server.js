@@ -53,32 +53,37 @@ app.get('/:section?', function(request, response) {
   logger.info(userAgent + ' ' + request.method + ' ' + request.path + ' ' +
       request.ip);
 
-  apiAccessor.fetch(section, function(error, results) {
-    var isCurl = userAgent.indexOf('curl') != -1;
-    if (error) {
-      logger.info('ERROR: ' + error);
-      if (isCurl) {
-        response.send("An error occurred. Please try again later. ".red +
-                      "(Most likely we hit our rate limit)\n".red);
+  if (!ApiAccessor.isValidSection(section)) {
+    response.send(('Not a valid section to query! Valid queries:\n' + (
+    ApiAccessor.SECTIONS.join('\n') + '\n')).red);
+  } else {
+    apiAccessor.fetch(section, function(error, results) {
+      var isCurl = userAgent.indexOf('curl') != -1;
+      if (error) {
+        logger.info('ERROR: ' + error);
+        if (isCurl) {
+          response.send("An error occurred. Please try again later. ".red +
+                        "(Most likely we hit our rate limit)\n".red);
+        } else {
+          response.render('index.html', {
+            error: true,
+            data: null
+          });
+        }
       } else {
-        response.render('index.html', {
-          error: true,
-          data: null
-        });
+        if (isCurl) {
+          response.send(DataFormatter.format(results) +
+                        DataFormatter.INCOGNITO_SUGGESTION +
+                        DataFormatter.TWITTER_LINK);
+        } else {
+          response.render('index.html', {
+            error: null,
+            data: results
+          });
+        }
       }
-    } else {
-      if (isCurl) {
-        response.send(DataFormatter.format(results) +
-                      DataFormatter.INCOGNITO_SUGGESTION +
-                      DataFormatter.TWITTER_LINK);
-      } else {
-        response.render('index.html', {
-          error: null,
-          data: results
-        });
-      }
-    }
-  })
+    });
+  }
 });
 
 // Starts the server.
