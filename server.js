@@ -18,6 +18,10 @@ var http = require('http');
 var morgan = require('morgan');
 var swig = require('swig');
 var winston = require('winston');
+winston.add(winston.transports.File, {
+  filename: 'logs/server.log'
+});
+winston.remove(winston.transports.Console);
 
 var ApiAccessor = require('./lib/ApiAccessor');
 var DataFormatter = require('./lib/DataFormatter')
@@ -26,11 +30,6 @@ var DataFormatter = require('./lib/DataFormatter')
 var app = express();
 var server = http.Server(app);
 var apiAccessor = ApiAccessor.create(NYTIMES_API_KEY, URL_SHORTENER_API_KEY);
-var logger = new (winston.Logger)({
-  transports: [
-    new (winston.transports.File)({ filename: 'logfile.log' })
-  ]
-});
 
 app.engine('html', swig.renderFile);
 
@@ -39,35 +38,43 @@ app.set('port', PORT_NUMBER);
 app.set('view engine', 'html');
 
 app.use(morgan(':date[web] :method :url :req[header] :remote-addr :status'));
-
 app.use('/public', express.static(__dirname + '/public'));
-
-app.use('/favicon.ico', favicon(__dirname + '/public/images/favicon.ico'));
-
 app.use('/robots.txt', express.static(__dirname + '/robots.txt'));
+app.use('/favicon.ico', favicon(__dirname + '/public/images/favicon.ico'));
 
 app.get('/:section?', function(request, response) {
   var userAgent = request.headers['user-agent'] || '';
   var section = request.params.section || 'home';
+  var isCurl = userAgent.indexOf('curl') != -1;
 
-  logger.info(userAgent + ' ' + request.method + ' ' + request.path + ' ' +
-      request.ip);
+  winston.info({
+    userAgent: userAgent,
+    method: request.method,
+    path: request.path,
+    ip: request.ip
+  });
 
   if (!ApiAccessor.isValidSection(section)) {
-    response.send(('Not a valid section to query! Valid queries:\n' + (
-    ApiAccessor.SECTIONS.join('\n') + '\n')).red);
+    if (isCurl) {
+      response.send(('Not a valid section to query! Valid queries:\n' + (
+        ApiAccessor.SECTIONS.join('\n') + '\n')).red);
+    } else {
+      response.render('index.html', {
+        error: 'Not a valid section to query! Valid queries:<br />' + (
+          ApiAccessor.SECTIONS.join('<br />'))
+      });
+    }
   } else {
     apiAccessor.fetch(section, function(error, results) {
-      var isCurl = userAgent.indexOf('curl') != -1;
       if (error) {
-        logger.info('ERROR: ' + error);
+        winston.error(error);
         if (isCurl) {
           response.send("An error occurred. Please try again later. ".red +
                         "(Most likely we hit our rate limit)\n".red);
         } else {
           response.render('index.html', {
-            error: true,
-            data: null
+            error: 'An error occurred. Please try again later. ' +
+              '(Most likely we hit our rate limit)'
           });
         }
       } else {
