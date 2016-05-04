@@ -1,0 +1,13 @@
+{
+  "uid": "nycurl",
+  "append": true,
+  "watch": false,
+  "script": "server.js",
+  "sourceDir": "/home/omgimanerd/nycurl",
+  "minUptime": 1000,
+  "spinSleepTime": 1000,
+  "l": "/home/omgimanerd/nycurl/logs/forever.log",
+  "o": "/home/omgimanerd/nycurl/logs/stdout.log",
+  "e": "/home/omgimanerd/nycurl/logs/stderr.log",
+  "p": "/home/omgimanerd/nycurl"
+}
