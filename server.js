@@ -47,8 +47,6 @@ app.get('/:section?', function(request, response) {
   var section = request.params.section || 'home';
   var isCurl = userAgent.indexOf('curl') != -1;
 
-  console.log(request.headers);
-
   winston.info({
     userAgent: userAgent,
     method: request.method,
