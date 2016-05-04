@@ -47,11 +47,13 @@ app.get('/:section?', function(request, response) {
   var section = request.params.section || 'home';
   var isCurl = userAgent.indexOf('curl') != -1;
 
+  console.log(request.headers);
+
   winston.info({
     userAgent: userAgent,
     method: request.method,
     path: request.path,
-    ip: request.ip
+    ip: request.headers['x-forwarded-for'] || request.headers['ip']
   });
 
   if (!ApiAccessor.isValidSection(section)) {
