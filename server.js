@@ -18,10 +18,6 @@ var http = require('http');
 var morgan = require('morgan');
 var swig = require('swig');
 var winston = require('winston');
-winston.add(winston.transports.File, {
-  filename: 'logs/server.log'
-});
-winston.remove(winston.transports.Console);
 
 var ApiAccessor = require('./lib/ApiAccessor');
 var DataFormatter = require('./lib/DataFormatter')
@@ -29,6 +25,16 @@ var DataFormatter = require('./lib/DataFormatter')
 // Initialization.
 var app = express();
 var server = http.Server(app);
+var errorLogger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.File)({ filename: './logs/error.log' })
+  ]
+});
+var serverLogger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.File)({ filename: './logs/server.log' })
+  ]
+});
 var apiAccessor = ApiAccessor.create(NYTIMES_API_KEY, URL_SHORTENER_API_KEY);
 
 app.engine('html', swig.renderFile);
@@ -47,7 +53,7 @@ app.get('/:section?', function(request, response) {
   var section = request.params.section || 'home';
   var isCurl = userAgent.indexOf('curl') != -1;
 
-  winston.info({
+  serverLogger.info({
     userAgent: userAgent,
     method: request.method,
     path: request.path,
@@ -56,6 +62,7 @@ app.get('/:section?', function(request, response) {
 
   if (!ApiAccessor.isValidSection(section)) {
     if (isCurl) {
+      response.status(404);
       response.send(('Not a valid section to query! Valid queries:\n' + (
         ApiAccessor.SECTIONS.join('\n') + '\n')).red);
     } else {
@@ -67,7 +74,8 @@ app.get('/:section?', function(request, response) {
   } else {
     apiAccessor.fetch(section, function(error, results) {
       if (error) {
-        winston.error(error);
+        errorLogger.error(error);
+        response.status(500);
         if (isCurl) {
           response.send("An error occurred. Please try again later. ".red +
                         "(Most likely we hit our rate limit)\n".red);
