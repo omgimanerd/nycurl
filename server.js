@@ -57,7 +57,7 @@ app.get('/:section?', function(request, response) {
     userAgent: userAgent,
     method: request.method,
     path: request.path,
-    ip: request.headers['x-forwarded-for'] || request.headers['ip']
+    ip: request.ip
   });
 
   if (!ApiAccessor.isValidSection(section)) {
