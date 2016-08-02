@@ -86,15 +86,22 @@ app.get('/:section?', function(request, response) {
           });
         }
       } else {
-        if (isCurl) {
-          response.send(DataFormatter.format(results) +
-                        DataFormatter.INCOGNITO_SUGGESTION +
-                        DataFormatter.TWITTER_LINK);
-        } else {
-          response.render('index.html', {
-            error: null,
-            data: results
-          });
+        try {
+          if (isCurl) {
+            response.send(DataFormatter.format(results) +
+                          DataFormatter.INCOGNITO_SUGGESTION +
+                          DataFormatter.TWITTER_LINK);
+          } else {
+            response.render('index.html', {
+              error: null,
+              data: results
+            });
+          }
+        } catch (e) {
+          errorLogger.error(e);
+          errorLogger.error(e.message);
+          response.render(
+            'Sorry I screwed up! Please contact me at alvin.lin.dev@gmail.com');
         }
       }
     });
