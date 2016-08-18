@@ -13,9 +13,7 @@ var URL_SHORTENER_API_KEY = process.env.URL_SHORTENER_API_KEY;
 var assert = require('assert');
 var colors = require('colors');
 var express = require('express');
-var favicon = require('serve-favicon');
 var http = require('http');
-var morgan = require('morgan');
 var swig = require('swig');
 var winston = require('winston');
 
@@ -43,10 +41,10 @@ app.set('port', PORT_NUMBER);
 
 app.set('view engine', 'html');
 
-app.use(morgan(':date[web] :method :url :req[header] :remote-addr :status'));
 app.use('/public', express.static(__dirname + '/public'));
 app.use('/robots.txt', express.static(__dirname + '/robots.txt'));
-app.use('/favicon.ico', favicon(__dirname + '/public/images/favicon.ico'));
+app.use('/favicon.ico', express.static(
+    __dirname + '/public/images/favicon.ico'));
 
 app.get('/:section?', function(request, response) {
   var userAgent = request.headers['user-agent'] || '';
@@ -97,9 +95,9 @@ app.get('/:section?', function(request, response) {
               data: results
             });
           }
-        } catch (e) {
-          errorLogger.error(e);
-          errorLogger.error(e.message);
+        } catch (error) {
+          errorLogger.error(error);
+          errorLogger.error(error.message);
           response.render(
             'Sorry I screwed up! Please contact me at alvin.lin.dev@gmail.com');
         }
