@@ -87,7 +87,6 @@ app.get('/:section?', function(request, response) {
         try {
           if (isCurl) {
             response.send(DataFormatter.format(results) +
-                          DataFormatter.INCOGNITO_SUGGESTION +
                           DataFormatter.TWITTER_LINK);
           } else {
             response.render('index.html', {
