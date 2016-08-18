@@ -1,0 +1,4 @@
+#!/bin/bash
+# TODO: add unit tests
+
+git grep -i todo
