@@ -78,6 +78,7 @@ app.get('/:section?', function(request, response) {
           response.send("An error occurred. Please try again later. ".red +
                         "(Most likely we hit our rate limit)\n".red);
         } else {
+          response.status(500);
           response.render('index.html', {
             error: 'An error occurred. Please try again later. ' +
               '(Most likely we hit our rate limit)'
@@ -97,6 +98,7 @@ app.get('/:section?', function(request, response) {
         } catch (error) {
           errorLogger.error(error);
           errorLogger.error(error.message);
+          response.status(500);
           response.render(
             'Sorry I screwed up! Please contact me at alvin.lin.dev@gmail.com');
         }
