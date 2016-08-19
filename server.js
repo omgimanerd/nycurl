@@ -11,7 +11,7 @@ var URL_SHORTENER_API_KEY = process.env.URL_SHORTENER_API_KEY;
 
 // Dependencies.
 var assert = require('assert');
-var colors = require('colors');
+var chalk = require('chalk');
 var express = require('express');
 var http = require('http');
 var swig = require('swig');
@@ -61,8 +61,9 @@ app.get('/:section?', function(request, response) {
   if (!ApiAccessor.isValidSection(section)) {
     if (isCurl) {
       response.status(404);
-      response.send(('Not a valid section to query! Valid queries:\n' + (
-        ApiAccessor.SECTIONS.join('\n') + '\n')).red);
+      response.send(chalk.red(
+          'Not a valid section to query! Valid queries:\n' + (
+          ApiAccessor.SECTIONS.join('\n') + '\n')));
     } else {
       response.render('index.html', {
         error: 'Not a valid section to query! Valid queries:<br />' + (
@@ -75,8 +76,9 @@ app.get('/:section?', function(request, response) {
         errorLogger.error(error);
         response.status(500);
         if (isCurl) {
-          response.send("An error occurred. Please try again later. ".red +
-                        "(Most likely we hit our rate limit)\n".red);
+          response.send(chalk.red(
+              "An error occurred. Please try again later. " +
+              "(Most likely we hit our rate limit)\n"));
         } else {
           response.status(500);
           response.render('index.html', {
@@ -85,22 +87,14 @@ app.get('/:section?', function(request, response) {
           });
         }
       } else {
-        try {
-          if (isCurl) {
-            response.send(DataFormatter.format(results) +
-                          DataFormatter.TWITTER_LINK);
-          } else {
-            response.render('index.html', {
-              error: null,
-              data: results
-            });
-          }
-        } catch (error) {
-          errorLogger.error(error);
-          errorLogger.error(error.message);
-          response.status(500);
-          response.render(
-            'Sorry I screwed up! Please contact me at alvin.lin.dev@gmail.com');
+        if (isCurl) {
+          response.send(DataFormatter.format(results) +
+                        DataFormatter.TWITTER_LINK);
+        } else {
+          response.render('index.html', {
+            error: null,
+            data: results
+          });
         }
       }
     });
