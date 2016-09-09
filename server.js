@@ -4,15 +4,14 @@
  */
 
 // Constants
-var IP = process.env.IP || 'localhost';
-var PORT_NUMBER = process.env.PORT || 5000;
-var NYTIMES_API_KEY = process.env.NYTIMES_API_KEY;
-var URL_SHORTENER_API_KEY = process.env.URL_SHORTENER_API_KEY;
+const IP = process.env.IP || 'localhost';
+const PORT_NUMBER = process.env.PORT || 5000;
 
 // Dependencies.
 var assert = require('assert');
 var chalk = require('chalk');
 var express = require('express');
+var gmailSend = require('gmail-send');
 var http = require('http');
 var swig = require('swig');
 var winston = require('winston');
@@ -23,17 +22,24 @@ var DataFormatter = require('./lib/DataFormatter')
 // Initialization.
 var app = express();
 var server = http.Server(app);
-var errorLogger = new (winston.Logger)({
+var errorLogger = new winston.Logger({
   transports: [
     new (winston.transports.File)({ filename: './logs/error.log' })
   ]
 });
-var serverLogger = new (winston.Logger)({
+var serverLogger = new winston.Logger({
   transports: [
     new (winston.transports.File)({ filename: './logs/server.log' })
   ]
 });
-var apiAccessor = ApiAccessor.create(NYTIMES_API_KEY, URL_SHORTENER_API_KEY);
+var apiAccessor = ApiAccessor.create(process.env.NYTIMES_API_KEY,
+                                     process.env.URL_SHORTENER_API_KEY);
+
+var email = gmailSend({
+  user: process.env.GMAIL_ACCOUNT,
+  pass: process.env.GMAIL_APPLICATION_PASSWORD,
+  to: process.env.GMAIL_ACCOUNT
+});
 
 app.engine('html', swig.renderFile);
 
@@ -74,18 +80,23 @@ app.get('/:section?', function(request, response) {
     apiAccessor.fetch(section, function(error, results) {
       if (error) {
         errorLogger.error(error);
-        response.status(500);
-        if (isCurl) {
-          response.send(chalk.red(
-              "An error occurred. Please try again later. " +
-              "(Most likely we hit our rate limit)\n"));
-        } else {
-          response.status(500);
-          response.render('index.html', {
-            error: 'An error occurred. Please try again later. ' +
-              '(Most likely we hit our rate limit)'
-          });
-        }
+        email({
+          from: 'alert@nycurl.sytes.net',
+          replyTo: 'alert@nycurl.sytes.net',
+          subject: 'nycurl.sytes.net - Error',
+          text: 'Error: ' + error
+        }, function() {
+          if (isCurl) {
+            response.status(500).send(chalk.red(
+                "An error occurred. Please try again later. " +
+                "(Most likely we hit our rate limit)\n"));
+          } else {
+            response.status(500).render('index.html', {
+              error: 'An error occurred. Please try again later. ' +
+                '(Most likely we hit our rate limit)'
+            });
+          }
+        });
       } else {
         if (isCurl) {
           response.send(DataFormatter.format(results) +
@@ -103,8 +114,14 @@ app.get('/:section?', function(request, response) {
 
 // Starts the server.
 server.listen(PORT_NUMBER, function() {
-  if (!NYTIMES_API_KEY || !URL_SHORTENER_API_KEY) {
+  if (!process.env.NYTIMES_API_KEY || !process.env.URL_SHORTENER_API_KEY) {
     throw new Error('Cannot access API keys.')
+  }
+  if (!process.env.GMAIL_ACCOUNT) {
+    throw new Error('No Gmail account specified!');
+  }
+  if (!process.env.GMAIL_APPLICATION_PASSWORD) {
+    throw new Error('No Gmail application password specified!');
   }
   console.log('STARTING SERVER ON PORT ' + PORT_NUMBER);
 });
