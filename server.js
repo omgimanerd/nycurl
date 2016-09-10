@@ -11,7 +11,6 @@ const PORT_NUMBER = process.env.PORT || 5000;
 var assert = require('assert');
 var chalk = require('chalk');
 var express = require('express');
-var gmailSend = require('gmail-send');
 var http = require('http');
 var swig = require('swig');
 var winston = require('winston');
@@ -35,11 +34,7 @@ var serverLogger = new winston.Logger({
 var apiAccessor = ApiAccessor.create(process.env.NYTIMES_API_KEY,
                                      process.env.URL_SHORTENER_API_KEY);
 
-var email = gmailSend({
-  user: process.env.GMAIL_ACCOUNT,
-  pass: process.env.GMAIL_APPLICATION_PASSWORD,
-  to: process.env.GMAIL_ACCOUNT
-});
+var alert = require('../lib/alert')(process.env.SENDGRID_API_KEY);
 
 app.engine('html', swig.renderFile);
 
@@ -80,12 +75,7 @@ app.get('/:section?', function(request, response) {
     apiAccessor.fetch(section, function(error, results) {
       if (error) {
         errorLogger.error(error);
-        email({
-          from: 'alert@nycurl.sytes.net',
-          replyTo: 'alert@nycurl.sytes.net',
-          subject: 'nycurl.sytes.net - Error',
-          text: 'Error: ' + error
-        }, function() {
+        alert('nycurl.sytes.net - Error', error, function(error, results) {
           if (isCurl) {
             response.status(500).send(chalk.red(
                 "An error occurred. Please try again later. " +
@@ -114,14 +104,14 @@ app.get('/:section?', function(request, response) {
 
 // Starts the server.
 server.listen(PORT_NUMBER, function() {
-  if (!process.env.NYTIMES_API_KEY || !process.env.URL_SHORTENER_API_KEY) {
-    throw new Error('Cannot access API keys.')
+  if (!process.env.NYTIMES_API_KEY) {
+    throw new Error('No NYTIMES API key specified.');
   }
-  if (!process.env.GMAIL_ACCOUNT) {
-    throw new Error('No Gmail account specified!');
+  if (!process.env.URL_SHORTENER_API_KEY) {
+    throw new Error('No URL shortener API key specified.');
   }
-  if (!process.env.GMAIL_APPLICATION_PASSWORD) {
-    throw new Error('No Gmail application password specified!');
+  if (!process.env.SENDGRID_API_KEY) {
+    throw new Error('No SendGrid API key specified!');
   }
   console.log('STARTING SERVER ON PORT ' + PORT_NUMBER);
 });

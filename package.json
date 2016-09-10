@@ -22,12 +22,12 @@
     "chalk": "^1.1.3",
     "cli-table": "^0.3.1",
     "express": "^4.14.0",
-    "gmail-send": "^1.2.6",
     "gulp": "^3.9.1",
     "gulp-gjslint": "^0.1.5",
     "lodash": "^4.15.0",
     "merge-stream": "^1.0.0",
     "request": "^2.74.0",
+    "sendgrid": "^4.1.0",
     "serve-favicon": "^2.3.0",
     "swig": "^1.4.2",
     "winston": "^2.2.0"
