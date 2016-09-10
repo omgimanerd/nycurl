@@ -34,7 +34,7 @@ var serverLogger = new winston.Logger({
 var apiAccessor = ApiAccessor.create(process.env.NYTIMES_API_KEY,
                                      process.env.URL_SHORTENER_API_KEY);
 
-var alert = require('../lib/alert')(process.env.SENDGRID_API_KEY);
+var alert = require('./lib/alert')(process.env.SENDGRID_API_KEY);
 
 app.engine('html', swig.renderFile);
 
