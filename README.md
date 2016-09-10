@@ -17,18 +17,20 @@ curl nycurl.herokuapp.com/politics
 
 ## Contributing
 Fork this repository and send me a pull request with any suggestions and
-changes.
-Use two-space indents and camel-cased variables.
+changes. Use two-space indents and camel-cased variables.
 
 You will need to acquire a Top Stories API Key from the
-[New York Times](http://developer.nytimes.com).
-and a URL Shortener API Key from
-[Google Developers](https://console.developers.google.com)
+[New York Times](http://developer.nytimes.com),
+a URL Shortener API Key from
+[Google Developers](https://console.developers.google.com),
+and a SendGrid API Key with Email access from
+[SendGrid](http://sendgrid.com/). The SendGrid API is used for email alerts.
 
 Add them to your .bashrc or other environment variable configuration:
 ```bash
 export NYTIMES_API_KEY=YOUR_KEY_HERE
 export URL_SHORTENER_API_KEY=YOUR_KEY_HERE
+export SENDGRID_API_KEY=YOUR_KEY_HERE
 ```
 
 Install the project dependencies:
