@@ -42,15 +42,16 @@ app.use('/public', express.static(__dirname + '/public'));
 app.use('/robots.txt', express.static(__dirname + '/robots.txt'));
 app.use('/favicon.ico',
   express.static(__dirname + '/public/images/favicon.ico'));
+app.use(function(request, response, next) {
+  request.userAgent = request.headers['user-agent'] || '';
+  request.isCurl = request.userAgent.includes('curl');
+  request.ip = request.headers['x-forwarded-for'] || request.headers['ip'];
+  next();
+});
 app.use(morgan('dev'));
 app.use(morgan('combined', {
   stream: logWriteStream
 }));
-app.use(function(request, response, next) {
-  request.userAgent = request.headers['user-agent'] || '';
-  request.isCurl = request.userAgent.includes('curl');
-  next();
-});
 
 app.get('/help', function(request, response) {
   if (request.isCurl) {
