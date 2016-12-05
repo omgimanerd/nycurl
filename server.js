@@ -33,7 +33,7 @@ var apiAccessor = ApiAccessor.create({
 var app = express();
 var logWriteStream = fs.createWriteStream(
   path.join(__dirname, 'logs/server.log'), { flags: 'a' });
-morgan.token(':remote-addr', function(request, response) {
+morgan.token('remote-addr', function(request, response) {
   return request.headers['x-forwarded-for'] || request.headers['ip'];
 });
 var server = http.Server(app);
