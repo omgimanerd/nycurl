@@ -1,10 +1,10 @@
 /**
  * Multipurpose Javascript Task Runner to compile my projects.
  * @author Alvin Lin (alvin.lin.dev@gmail.com)
- * @version 2.0.0
+ * @version 2.1.0
  */
 
-const version = "2.0.0";
+const version = "2.1.0";
 
 var semver = require('semver');
 
@@ -172,21 +172,27 @@ gulp.task('test', function() {
 });
 
 gulp.task('watch-js', function() {
-  BUILD.JS_BUILD_RULES.map(function(rule) {
-    gulp.watch(rule.sourceFiles, ['js'])
-  });
+  if (BUILD.JS_BUILD_RULES) {
+    BUILD.JS_BUILD_RULES.map(function(rule) {
+      gulp.watch(rule.sourceFiles, ['js'])
+    });
+  }
 });
 
 gulp.task('watch-less', function() {
-  BUILD.LESS_BUILD_RULES.map(function(rule) {
-    gulp.watch(rule.sourceFiles, ['less']);
-  })
+  if (BUILD.LESS_BUILD_RULES) {
+    BUILD.LESS_BUILD_RULES.map(function(rule) {
+      gulp.watch(rule.sourceFiles, ['less']);
+    });
+  }
 });
 
 gulp.task('watch-sass', function() {
-  BUILD.SASS_BUILD_RULES.map(function(rule) {
-    gulp.watch(rule.sourceFiles, ['sass']);
-  })
+  if (BUILD.SASS_BUILD_RULES) {
+    BUILD.SASS_BUILD_RULES.map(function(rule) {
+      gulp.watch(rule.sourceFiles, ['sass']);
+    });
+  }
 });
 
 gulp.task('watch', ['watch-js', 'watch-less', 'watch-sass']);
