@@ -94,7 +94,8 @@ app.get('/:section?', function(request, response, next) {
                       DataFormatter.CURL_GITHUB_LINK);
       } else {
         response.render('index', {
-          error: null,
+          header: `nycurl.sytes.net/${section}`,
+          listSections: false,
           data: results
         });
       }
