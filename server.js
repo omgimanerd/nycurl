@@ -104,7 +104,7 @@ app.get('/:section?', function(request, response, next) {
 
 app.use(function(request, response) {
   if (request.isCurl) {
-    response.send(chalk.green(
+    response.send(chalk.red(
       'Invalid query! Valid queries:\n' + (
       ApiAccessor.SECTIONS.join('\n') + '\n')));
   } else {
