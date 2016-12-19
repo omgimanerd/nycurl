@@ -10,9 +10,7 @@
 
 html, body {
   width: 100%;
-  min-width: 1080px;
-  height: 100%;
-  min-height: 760px;
+  min-width: 800px;
   margin: 0;
   border: 0;
   padding: 0;
@@ -23,15 +21,46 @@ html, body {
   color: #FFFFFF;
 }
 
-.error {
+.header {
   color: #CC0219;
   text-align: center;
-  padding: 50px;
+  padding: 20px;
+  margin: 0px;
+}
+
+.sections {
+  text-align: center;
+  list-style-type: none;
+}
+
+.sections a, .sections a:visited {
+  color: #88e234;
+  text-decoration: none;
+  transition: all 200ms;
+}
+
+.sections a:hover {
+  color: #3f7a06;
+}
+
+.help {
+  text-align: center;
+  margin: 0;
+  padding: 20px;
+}
+
+.help a, .help a:visited {
+  color: #88e234;
+  text-decoration: none;
+  transition: all 200ms;
+}
+
+.help a:hover {
+  color: #3f7a06;
 }
 
 .articles {
-  width: 800px;
-  margin: 20px auto;
+  margin: 20px 100px;
   border-collapse: collapse;
 }
 
@@ -53,7 +82,7 @@ html, body {
 }
 
 .title {
-  color: #34E2E2;
+  color: #88e234;
 }
 
 .url a, .url a:visited {
@@ -69,4 +98,9 @@ html, body {
 .media {
   text-align: center;
   margin-bottom: 50px;
+}
+
+.media div {
+  display: inline-block;
+  margin: 5px;
 }
