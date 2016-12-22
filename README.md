@@ -7,12 +7,12 @@ to each article is included if the user wants to read the full article.
 ## Usage
 You can fetch the latest news simply by typing  
 ```bash
-curl nycurl.sytes.com
+curl nycurl.sytes.net
 ```
 This application also accepts queries to the various sections of the NY Times.
 ```bash
-curl nycurl.sytes.com/technology
-curl nycurl.sytes.com/politics
+curl nycurl.sytes.net/technology
+curl nycurl.sytes.net/politics
 ```
 
 ## Contributing
