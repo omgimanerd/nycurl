@@ -4,7 +4,6 @@
  */
 
 // Constants
-const IP = process.env.IP || 'localhost';
 const PORT = process.env.PORT || 5000;
 
 // Dependencies.
@@ -16,6 +15,7 @@ var morgan = require('morgan');
 var path = require('path');
 var http = require('http');
 
+var logFile = path.join(__dirname, 'logs/server.log');
 var ApiAccessor = require('./lib/ApiAccessor');
 var DataFormatter = require('./lib/DataFormatter')
 
@@ -31,10 +31,25 @@ var apiAccessor = ApiAccessor.create({
   url_shortener_api_key: process.env.URL_SHORTENER_API_KEY
 });
 var app = express();
-var logWriteStream = fs.createWriteStream(
-  path.join(__dirname, 'logs/server.log'), { flags: 'a' });
-morgan.token('remote-addr', function(request, response) {
-  return request.headers['x-forwarded-for'] || request.headers['ip'];
+var logWriteStream = fs.createWriteStream(logFile, { flags: 'a' });
+/**
+ * Custom token for logging.
+ */
+morgan.token('log', function(request, response) {
+  // Taken from morgan source code.
+  var responseTime = (response._startAt[0] - request._startAt[0]) * 1e3 +
+    (response._startAt[1] - request._startAt[1]) * 1e-6;
+  return JSON.stringify({
+    date: (new Date()).toUTCString(),
+    httpVersion: request.httpVersionMajor + '.' + request.httpVersionMinor,
+    method: request.method,
+    referrer: request.headers['referer'] || request.headers['referrer'],
+    ip: request.headers['x-forwarded-for'] || request.headers['ip'],
+    responseTime: responseTime,
+    status: response.statusCode,
+    url: request.url ||  request.originalUrl,
+    userAgent: request.headers['user-agent']
+  });
 });
 var server = http.Server(app);
 
@@ -46,7 +61,7 @@ app.use('/robots.txt', express.static(__dirname + '/robots.txt'));
 app.use('/favicon.ico',
   express.static(__dirname + '/public/images/favicon.ico'));
 app.use(morgan('dev'));
-app.use(morgan('combined', {
+app.use(morgan(':log', {
   stream: logWriteStream
 }));
 app.use(function(request, response, next) {
