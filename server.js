@@ -37,8 +37,12 @@ var logWriteStream = fs.createWriteStream(logFile, { flags: 'a' });
  */
 morgan.token('log', function(request, response) {
   // Taken from morgan source code.
-  var responseTime = (response._startAt[0] - request._startAt[0]) * 1e3 +
-    (response._startAt[1] - request._startAt[1]) * 1e-6;
+  try {
+    var responseTime = (response._startAt[0] - request._startAt[0]) * 1e3 +
+        (response._startAt[1] - request._startAt[1]) * 1e-6;
+  } catch (e) {
+    var responseTime = "n/a";
+  }
   return JSON.stringify({
     date: (new Date()).toUTCString(),
     httpVersion: request.httpVersionMajor + '.' + request.httpVersionMinor,
