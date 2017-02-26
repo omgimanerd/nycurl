@@ -7,13 +7,13 @@
 const PORT = process.env.PORT || 5000;
 
 // Dependencies.
-var chalk = require('chalk');
-var emailAlerts = require('email-alerts');
-var express = require('express');
-var fs = require('fs');
-var morgan = require('morgan');
-var path = require('path');
-var http = require('http');
+const colors = require('colors');
+const emailAlerts = require('email-alerts');
+const express = require('express');
+const fs = require('fs');
+const morgan = require('morgan');
+const path = require('path');
+const http = require('http');
 
 var logFile = path.join(__dirname, 'logs/server.log');
 var ApiAccessor = require('./lib/ApiAccessor');
@@ -76,9 +76,8 @@ app.use(function(request, response, next) {
 
 app.get('/help', function(request, response) {
   if (request.isCurl) {
-    response.send(chalk.green(
-      'Valid queries:\n' + (
-      ApiAccessor.SECTIONS.join('\n') + '\n')));
+    response.send('Valid queries:\n'.red +
+        ApiAccessor.SECTIONS.join('\n') + '\n');
   } else {
     response.render('index', {
       header: 'Valid sections to query:',
@@ -96,9 +95,9 @@ app.get('/:section?', function(request, response, next) {
   apiAccessor.fetch(section, alert.errorHandler(function(error, results) {
     if (error) {
       if (request.isCurl) {
-        response.status(500).send(chalk.red(
-            'An error occurred. Please try again later. ' +
-            '(Most likely we hit our rate limit)\n'));
+        response.status(500).send(
+            'An error occurred. Please try again later. '.red +
+            '(Most likely we hit our rate limit)\n'.red);
       } else {
         response.status(500).render('index', {
           header: 'An error occurred. Please try again later. ' +
@@ -107,10 +106,9 @@ app.get('/:section?', function(request, response, next) {
       }
     } else {
       if (request.isCurl) {
-        response.send(DataFormatter.CURL_HELP +
-                      DataFormatter.format(results) +
-                      DataFormatter.CURL_TWITTER_LINK +
-                      DataFormatter.CURL_GITHUB_LINK);
+        response.send(DataFormatter.format(results) +
+                      DataFormatter.TWITTER_LINK +
+                      DataFormatter.GITHUB_LINK);
       } else {
         response.render('index', {
           header: `nycurl.sytes.net/${section}`,
@@ -124,9 +122,8 @@ app.get('/:section?', function(request, response, next) {
 
 app.use(function(request, response) {
   if (request.isCurl) {
-    response.send(chalk.red(
-      'Invalid query! Valid queries:\n' + (
-      ApiAccessor.SECTIONS.join('\n') + '\n')));
+    response.send('Invalid query! Valid queries:\n'.red +
+        ApiAccessor.SECTIONS.join('\n') + '\n');
   } else {
     response.render('index', {
       header: 'Invalid query! Valid sections to query:',
