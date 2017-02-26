@@ -15,9 +15,9 @@ const morgan = require('morgan');
 const path = require('path');
 const http = require('http');
 
-var logFile = path.join(__dirname, 'logs/server.log');
-var ApiAccessor = require('./lib/ApiAccessor');
-var DataFormatter = require('./lib/DataFormatter')
+const logFile = path.join(__dirname, 'logs/server.log');
+const ApiAccessor = require('./lib/ApiAccessor');
+const DataFormatter = require('./lib/DataFormatter')
 
 // Initialization.
 var alert = emailAlerts({
@@ -36,12 +36,12 @@ var logWriteStream = fs.createWriteStream(logFile, { flags: 'a' });
  * Custom token for logging.
  */
 morgan.token('log', function(request, response) {
-  // Taken from morgan source code.
   try {
-    var responseTime = (response._startAt[0] - request._startAt[0]) * 1e3 +
-        (response._startAt[1] - request._startAt[1]) * 1e-6;
+    // Taken from morgan source code.
+    var responseTime = ((response._startAt[0] - request._startAt[0]) * 1e3 +
+        (response._startAt[1] - request._startAt[1]) * 1e-6) | 0;
   } catch (e) {
-    var responseTime = "n/a";
+    var responseTime = 'n/a';
   }
   return JSON.stringify({
     date: (new Date()).toUTCString(),
@@ -49,7 +49,7 @@ morgan.token('log', function(request, response) {
     method: request.method,
     referrer: request.headers['referer'] || request.headers['referrer'],
     ip: request.headers['x-forwarded-for'] || request.headers['ip'],
-    responseTime: responseTime,
+    responseTime: responseTime | 0,
     status: response.statusCode,
     url: request.url ||  request.originalUrl,
     userAgent: request.headers['user-agent']
@@ -118,6 +118,10 @@ app.get('/:section?', function(request, response, next) {
       }
     }
   }));
+});
+
+app.post('/analytics', function(request, response) {
+
 });
 
 app.use(function(request, response) {
