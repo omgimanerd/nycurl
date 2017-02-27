@@ -102,6 +102,10 @@ app.get('/:section?', function(request, response, next) {
   analytics.log(request, response);
 });
 
+app.get('/analytics', function(request, response) {
+  response.render('analytics');
+});
+
 app.post('/analytics', function(request, response) {
   analytics.getAnalytics(function(error, data) {
     response.send(data);

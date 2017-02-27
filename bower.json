@@ -18,6 +18,7 @@
     "tests"
   ],
   "dependencies": {
-    "ubuntu-font": "*"
+    "ubuntu-font": "*",
+    "jquery": "^3.1.1"
   }
 }
