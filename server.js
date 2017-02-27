@@ -8,7 +8,6 @@ const PORT = process.env.PORT || 5000;
 
 // Dependencies.
 const colors = require('colors');
-const emailAlerts = require('email-alerts');
 const express = require('express');
 const fs = require('fs');
 const http = require('http');
@@ -22,13 +21,6 @@ const Analytics = require('./lib/Analytics');
 const ApiAccessor = require('./lib/ApiAccessor');
 const DataFormatter = require('./lib/DataFormatter')
 
-// Initialization.
-var alert = emailAlerts({
-  fromEmail: process.env.ALERT_SENDER_EMAIL,
-  toEmail: process.env.ALERT_RECEIVER_EMAIL,
-  apiKey: process.env.SENDGRID_API_KEY,
-  subject: 'Error - nycurl'
-});
 var analytics = Analytics.create(analyticsFile);
 var apiAccessor = ApiAccessor.create({
   nytimes_api_key: process.env.NYTIMES_API_KEY,
@@ -73,7 +65,7 @@ app.get('/:section?', function(request, response, next) {
   if (!ApiAccessor.isValidSection(section)) {
     return next();
   }
-  apiAccessor.fetch(section, alert.errorHandler(function(error, results) {
+  apiAccessor.fetch(section, function(error, results) {
     if (error) {
       if (request.isCurl) {
         response.status(500).send(
@@ -98,7 +90,7 @@ app.get('/:section?', function(request, response, next) {
         });
       }
     }
-  }));
+  });
   analytics.log(request, response);
 });
 
