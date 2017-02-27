@@ -42,8 +42,10 @@ app.use(morgan('combined', {
 }));
 app.use(responseTime({ digits: 2, header: 'response-time' }));
 app.use(function(request, response, next) {
-  request.userAgent = request.headers['user-agent'] || '';
-  request.isCurl = request.userAgent.includes('curl');
+  request['userAgent'] = request.headers['user-agent'] || '';
+  request['isCurl'] = request.userAgent.includes('curl');
+  request['httpVersion'] = request['httpVersionMajor'] + '.' +
+      request['httpVersionMinor'];
   next();
 });
 
