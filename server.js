@@ -11,11 +11,14 @@ const colors = require('colors');
 const emailAlerts = require('email-alerts');
 const express = require('express');
 const fs = require('fs');
+const http = require('http');
 const morgan = require('morgan');
 const path = require('path');
-const http = require('http');
+const responseTime = require('response-time');
 
 const logFile = path.join(__dirname, 'logs/server.log');
+const analyticsFile = path.join(__dirname, 'logs/analytics.log');
+const Analytics = require('./lib/Analytics');
 const ApiAccessor = require('./lib/ApiAccessor');
 const DataFormatter = require('./lib/DataFormatter')
 
@@ -26,35 +29,12 @@ var alert = emailAlerts({
   apiKey: process.env.SENDGRID_API_KEY,
   subject: 'Error - nycurl'
 });
+var analytics = Analytics.create(analyticsFile);
 var apiAccessor = ApiAccessor.create({
   nytimes_api_key: process.env.NYTIMES_API_KEY,
   url_shortener_api_key: process.env.URL_SHORTENER_API_KEY
 });
 var app = express();
-var logWriteStream = fs.createWriteStream(logFile, { flags: 'a' });
-/**
- * Custom token for logging.
- */
-morgan.token('log', function(request, response) {
-  try {
-    // Taken from morgan source code.
-    var responseTime = ((response._startAt[0] - request._startAt[0]) * 1e3 +
-        (response._startAt[1] - request._startAt[1]) * 1e-6) | 0;
-  } catch (e) {
-    var responseTime = 'n/a';
-  }
-  return JSON.stringify({
-    date: (new Date()).toUTCString(),
-    httpVersion: request.httpVersionMajor + '.' + request.httpVersionMinor,
-    method: request.method,
-    referrer: request.headers['referer'] || request.headers['referrer'],
-    ip: request.headers['x-forwarded-for'] || request.headers['ip'],
-    responseTime: responseTime | 0,
-    status: response.statusCode,
-    url: request.url ||  request.originalUrl,
-    userAgent: request.headers['user-agent']
-  });
-});
 var server = http.Server(app);
 
 app.set('port', PORT);
@@ -65,9 +45,10 @@ app.use('/robots.txt', express.static(__dirname + '/robots.txt'));
 app.use('/favicon.ico',
   express.static(__dirname + '/public/images/favicon.ico'));
 app.use(morgan('dev'));
-app.use(morgan(':log', {
-  stream: logWriteStream
+app.use(morgan('combined', {
+  stream: fs.createWriteStream(logFile, { flag: 'a' })
 }));
+app.use(responseTime({ digits: 2, header: 'response-time' }));
 app.use(function(request, response, next) {
   request.userAgent = request.headers['user-agent'] || '';
   request.isCurl = request.userAgent.includes('curl');
@@ -118,10 +99,13 @@ app.get('/:section?', function(request, response, next) {
       }
     }
   }));
+  analytics.log(request, response);
 });
 
 app.post('/analytics', function(request, response) {
-
+  analytics.getAnalytics(function(error, data) {
+    response.send(data);
+  });
 });
 
 app.use(function(request, response) {
