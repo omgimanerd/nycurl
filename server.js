@@ -46,7 +46,7 @@ app.use('/favicon.ico',
   express.static(__dirname + '/public/images/favicon.ico'));
 app.use(morgan('dev'));
 app.use(morgan('combined', {
-  stream: fs.createWriteStream(logFile, { flag: 'a' })
+  stream: fs.createWriteStream(logFile, { flags: 'a' })
 }));
 app.use(responseTime({ digits: 2, header: 'response-time' }));
 app.use(function(request, response, next) {
