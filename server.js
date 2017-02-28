@@ -4,10 +4,12 @@
  */
 
 // Constants
+const DEV_MODE = process.argv.includes('--dev');
 const PORT = process.env.PORT || 5000;
 
 // Dependencies.
 const colors = require('colors');
+const emailAlerts = require('email-alerts');
 const express = require('express');
 const fs = require('fs');
 const http = require('http');
@@ -27,6 +29,14 @@ var apiAccessor = ApiAccessor.create({
   url_shortener_api_key: process.env.URL_SHORTENER_API_KEY
 });
 var app = express();
+if (!DEV_MODE) {
+  var alert = emailAlerts({
+    fromEmail: process.env.ALERT_SENDER_EMAIL,
+    toEmail: process.env.ALERT_RECEIVER_EMAIL,
+    apiKey: process.env.SENDGRID_API_KEY,
+    subject: 'Error - nycurl'
+  });
+}
 var server = http.Server(app);
 
 app.set('port', PORT);
@@ -67,7 +77,7 @@ app.get('/:section?', function(request, response, next) {
   if (!ApiAccessor.isValidSection(section)) {
     return next();
   }
-  apiAccessor.fetch(section, function(error, results) {
+  var callback = function(error, results) {
     if (error) {
       if (request.isCurl) {
         response.status(500).send(
@@ -92,8 +102,13 @@ app.get('/:section?', function(request, response, next) {
         });
       }
     }
-  });
-  analytics.log(request, response);
+    analytics.log(request, response);
+  };
+  if (!DEV_MODE) {
+    apiAccessor.fetch(section, alert.errorHandler(callback));
+  } else {
+    apiAccessor.fetch(section, callback);
+  }
 });
 
 app.get('/analytics', function(request, response) {
@@ -122,13 +137,16 @@ app.use(function(request, response) {
 // Starts the server.
 server.listen(PORT, function() {
   console.log('STARTING SERVER ON PORT ' + PORT);
+  if (DEV_MODE) {
+    console.log('DEV_MODE ENABLED!');
+  }
   if (!process.env.NYTIMES_API_KEY) {
     throw new Error('No NYTimes API key specified.');
   }
   if (!process.env.URL_SHORTENER_API_KEY) {
     throw new Error('No URL shortener API key specified.');
   }
-  if (!process.env.SENDGRID_API_KEY) {
+  if (!DEV_MODE && !process.env.SENDGRID_API_KEY) {
     throw new Error('No SendGrid API key specified!');
   }
 });

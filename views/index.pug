@@ -17,7 +17,7 @@ html
         each section in sections
           li
             a(href="/" + section)= section
-    else
+    if data
       h4(class="help")
         a(href="/help") Click here for a list of sections to query
       table(class="articles")
