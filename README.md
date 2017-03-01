@@ -40,7 +40,7 @@ Run the server in development node:
 ```
 node server.js --dev
 ```
-*IF YOU DON'T USE DEV MODE, YOU WON'T BE ABLE TO GET IT WORKING*
+**IF YOU DON'T USE DEV MODE, YOU WON'T BE ABLE TO GET IT WORKING**
 
 ## License
 Copyright &copy; Alvin Lin 2016
