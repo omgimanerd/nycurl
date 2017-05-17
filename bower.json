@@ -20,6 +20,7 @@
   "dependencies": {
     "ubuntu-font": "*",
     "jquery": "^3.1.1",
-    "chart.js": "^2.5.0"
+    "chartist": "^0.11.0",
+    "moment": "^2.18.1"
   }
 }

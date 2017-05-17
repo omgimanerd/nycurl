@@ -27,3 +27,16 @@ html, body {
   padding: 20px;
   margin: 0px;
 }
+
+.container {
+  margin: auto;
+}
+
+.container div {
+  width: 600px;
+  height: 550px;
+  margin: auto;
+  padding: 35px;
+  background-color: #d2d2d2;
+  border-radius: 5px;
+}
