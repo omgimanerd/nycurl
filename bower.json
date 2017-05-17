@@ -19,6 +19,7 @@
   ],
   "dependencies": {
     "ubuntu-font": "*",
-    "jquery": "^3.1.1"
+    "jquery": "^3.1.1",
+    "chart.js": "^2.5.0"
   }
 }
