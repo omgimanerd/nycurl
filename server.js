@@ -114,9 +114,7 @@ app.get('/:section?', function(request, response, next) {
       }
     } else {
       if (request['isCurl']) {
-        response.send(DataFormatter.format(results) +
-                      DataFormatter.TWITTER_LINK +
-                      DataFormatter.GITHUB_LINK);
+        response.send(DataFormatter.format(results, request.query));
       } else {
         response.render('index', {
           header: `nycurl.sytes.net/${section}`,
