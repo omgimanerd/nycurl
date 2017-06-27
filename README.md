@@ -24,6 +24,13 @@ If you would like to specify a custom width for your terminal, you do so using:
 curl nycurl.sytes.net?w=92
 curl nycurl.sytes.net/technology?w=100
 ```
+You can also limit the number of articles to display.
+```bash
+curl nycurl.sytes.net?n=10
+curl nycurl.sytes.net?n=12\&w=95
+```
+Note that when combining the parameters on the command line as query parameters,
+you must use `\&` to escape the ampersand character.
 
 ## Contributing
 Fork this repository and send me a pull request with any suggestions and
