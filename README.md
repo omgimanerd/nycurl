@@ -14,6 +14,16 @@ This application also accepts queries to the various sections of the NY Times.
 curl nycurl.sytes.net/technology
 curl nycurl.sytes.net/politics
 ```
+Get a list of acceptable sections to query using:
+```bash
+curl nycurl.sytes.net/help
+```
+By default, nycurl will format the table to be a max of 72 characters wide.
+If you would like to specify a custom width for your terminal, you do so using:
+```bash
+curl nycurl.sytes.net?w=92
+curl nycurl.sytes.net/technology?w=100
+```
 
 ## Contributing
 Fork this repository and send me a pull request with any suggestions and
