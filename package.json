@@ -25,8 +25,7 @@
     "express": "^4.14.0",
     "morgan": "^1.7.0",
     "pug": "^2.0.0-beta6",
-    "request": "^2.79.0",
-    "response-time": "^2.3.2"
+    "request": "^2.79.0"
   },
   "devDependencies": {
     "gulp": "^3.9.1",

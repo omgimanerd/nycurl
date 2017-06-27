@@ -7,6 +7,9 @@
 const DEV_MODE = process.argv.includes('--dev');
 const PORT = process.env.PORT || 5000;
 
+const LOG_FILE = 'logs/server.log';
+const ANALYTICS_FILE = 'logs/analytics.log';
+
 // Dependencies.
 const colors = require('colors');
 const emailAlerts = require('email-alerts');
@@ -15,10 +18,12 @@ const fs = require('fs');
 const http = require('http');
 const morgan = require('morgan');
 const path = require('path');
-const responseTime = require('response-time');
 
-const logFile = path.join(__dirname, 'logs/server.log');
-const analyticsFile = path.join(__dirname, 'logs/analytics.log');
+const logFile = path.join(__dirname, LOG_FILE);
+const logFileStream = fs.createWriteStream(logFile, { flags: 'a' });
+const analyticsFile = path.join(__dirname, ANALYTICS_FILE);
+const analyticsFileStream = fs.createWriteStream(analyticsFile, { flags: 'a' });
+
 const Analytics = require('./lib/Analytics');
 const ApiAccessor = require('./lib/ApiAccessor');
 const DataFormatter = require('./lib/DataFormatter')
@@ -45,22 +50,40 @@ app.set('view engine', 'pug');
 app.use('/public', express.static(__dirname + '/public'));
 app.use('/robots.txt', express.static(__dirname + '/robots.txt'));
 app.use('/favicon.ico',
-  express.static(__dirname + '/public/images/favicon.ico'));
-app.use(morgan('dev'));
-app.use(morgan('combined', {
-  stream: fs.createWriteStream(logFile, { flags: 'a' })
-}));
-app.use(responseTime({ digits: 2, header: 'response-time' }));
+    express.static(`${__dirname}/public/images/favicon.ico`));
 app.use(function(request, response, next) {
   request['userAgent'] = request.headers['user-agent'] || '';
   request['isCurl'] = request.userAgent.includes('curl');
-  request['httpVersion'] = request['httpVersionMajor'] + '.' +
-      request['httpVersionMinor'];
   next();
 });
 
+// Log general server information to the console.
+app.use(morgan('dev'));
+// Write more specific log information to the server log file.
+app.use(morgan('combined', { stream: logFileStream }));
+// Only write cURL requests to the analytics file.
+app.use(morgan(function(tokens, request, response) {
+  return JSON.stringify({
+    date: (new Date()).toUTCString(),
+    httpVersion:
+        `${request['httpVersionMajor']}.${request['httpVersionMinor']}`,
+    method: request['method'],
+    referrer: request.headers['referer'] || request.headers['referrer'],
+    ip: request.headers['x-forwarded-for'] || request.headers['ip'],
+    responseTime: tokens['response-time'](request, response),
+    status: response['statusCode'],
+    url: request['url'] || request['originalUrl'],
+    userAgent: request['userAgent']
+  });
+}, {
+  skip: function(request, response) {
+    return !request['isCurl'];
+  },
+  stream: analyticsFileStream
+}));
+
 app.get('/help', function(request, response) {
-  if (request.isCurl) {
+  if (request['isCurl']) {
     response.send('Valid queries:\n'.red +
         ApiAccessor.SECTIONS.join('\n') + '\n');
   } else {
@@ -79,7 +102,7 @@ app.get('/:section?', function(request, response, next) {
   }
   var callback = function(error, results) {
     if (error) {
-      if (request.isCurl) {
+      if (request['isCurl']) {
         response.status(500).send(
             'An error occurred. Please try again later. '.red +
             '(Most likely we hit our rate limit)\n'.red);
@@ -90,7 +113,7 @@ app.get('/:section?', function(request, response, next) {
         });
       }
     } else {
-      if (request.isCurl) {
+      if (request['isCurl']) {
         response.send(DataFormatter.format(results) +
                       DataFormatter.TWITTER_LINK +
                       DataFormatter.GITHUB_LINK);
@@ -102,7 +125,6 @@ app.get('/:section?', function(request, response, next) {
         });
       }
     }
-    analytics.log(request, response);
   };
   if (!DEV_MODE) {
     apiAccessor.fetch(section, alert.errorHandler(callback));
@@ -122,7 +144,7 @@ app.post('/analytics', function(request, response) {
 });
 
 app.use(function(request, response) {
-  if (request.isCurl) {
+  if (request['isCurl']) {
     response.send('Invalid query! Valid queries:\n'.red +
         ApiAccessor.SECTIONS.join('\n') + '\n');
   } else {
@@ -147,6 +169,6 @@ server.listen(PORT, function() {
     throw new Error('No URL shortener API key specified.');
   }
   if (!DEV_MODE && !process.env.SENDGRID_API_KEY) {
-    throw new Error('No SendGrid API key specified!');
+    throw new Error('No SendGrid API key specified! Use --dev mode?');
   }
 });
