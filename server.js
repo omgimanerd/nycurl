@@ -4,6 +4,18 @@
  */
 
 // Constants
+const NYTIMES_API_KEY = process.env.NYTIMES_API_KEY;
+const URL_SHORTENER_API_KEY = process.env.URL_SHORTENER_API_KEY;
+
+/**
+ * This API key is only used in production to email Alvin Lin (@omgimanerd)
+ * when the production server goes down. Run the server in --dev mode during
+ * development
+ * @type {string}
+ */
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
+const ALERT_EMAIL = process.env.ALERT_EMAIL;
+
 const DEV_MODE = process.argv.includes('--dev');
 const PORT = process.env.PORT || 5000;
 
@@ -30,15 +42,15 @@ const DataFormatter = require('./lib/DataFormatter')
 
 var analytics = Analytics.create(analyticsFile);
 var apiAccessor = ApiAccessor.create({
-  nytimes_api_key: process.env.NYTIMES_API_KEY,
-  url_shortener_api_key: process.env.URL_SHORTENER_API_KEY
+  nytimes_api_key: NYTIMES_API_KEY,
+  url_shortener_api_key: URL_SHORTENER_API_KEY
 });
 var app = express();
 if (!DEV_MODE) {
   var alert = emailAlerts({
-    fromEmail: process.env.ALERT_SENDER_EMAIL,
-    toEmail: process.env.ALERT_RECEIVER_EMAIL,
-    apiKey: process.env.SENDGRID_API_KEY,
+    fromEmail: 'alert@nycurl.sytes.net',
+    toEmail: ALERT_EMAIL,
+    apiKey: SENDGRID_API_KEY,
     subject: 'Error - nycurl'
   });
 }
@@ -65,15 +77,14 @@ app.use(morgan('combined', { stream: logFileStream }));
 app.use(morgan(function(tokens, request, response) {
   return JSON.stringify({
     date: (new Date()).toUTCString(),
-    httpVersion:
-        `${request['httpVersionMajor']}.${request['httpVersionMinor']}`,
+    httpVersion: request['httpVersionMajor'] + '.' +
+        request['httpVersionMinor'],
     method: request['method'],
     referrer: request.headers['referer'] || request.headers['referrer'],
     ip: request.headers['x-forwarded-for'] || request.headers['ip'],
     responseTime: tokens['response-time'](request, response),
     status: response['statusCode'],
-    url: request['url'] || request['originalUrl'],
-    userAgent: request['userAgent']
+    url: request['url'] || request['originalUrl']
   });
 }, {
   skip: function(request, response) {
@@ -166,7 +177,10 @@ server.listen(PORT, function() {
   if (!process.env.URL_SHORTENER_API_KEY) {
     throw new Error('No URL shortener API key specified.');
   }
-  if (!DEV_MODE && !process.env.SENDGRID_API_KEY) {
+  if (!DEV_MODE && !SENDGRID_API_KEY) {
     throw new Error('No SendGrid API key specified! Use --dev mode?');
+  }
+  if (!DEV_MODE && !ALERT_EMAIL) {
+    throw new Error('No alert email specified! Use --dev mode?');
   }
 });
