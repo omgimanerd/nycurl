@@ -1,8 +1,9 @@
 # nycurl
-
 This is a web server that formats the latest news from the front page of the
 New York Times into a format that can be displayed in most terminals. A link
 to each article is included if the user wants to read the full article.
+To query more general news from other sources, check out
+[getnews.tech](https://github.com/omgimanerd/getnews.tech).
 
 ## Usage
 You can fetch the latest news simply by typing  
