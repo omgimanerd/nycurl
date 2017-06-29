@@ -95,8 +95,7 @@ app.use(morgan(function(tokens, request, response) {
 
 app.get('/help', function(request, response) {
   if (request['isCurl']) {
-    response.send('Valid queries:\n'.red +
-        ApiAccessor.SECTIONS.join('\n') + '\n');
+    response.send(DataFormatter.formatSections(ApiAccessor.SECTIONS, false));
   } else {
     response.render('index', {
       header: 'Valid sections to query:',
@@ -111,8 +110,11 @@ app.get('/:section?', function(request, response, next) {
   if (!ApiAccessor.isValidSection(section)) {
     return next();
   }
-  var callback = function(error, results) {
+  var callback = function(error, articles) {
     if (error) {
+      if (DEV_MODE) {
+        console.error(error);
+      }
       if (request['isCurl']) {
         response.status(500).send(
             'An error occurred. Please try again later. '.red +
@@ -125,12 +127,12 @@ app.get('/:section?', function(request, response, next) {
       }
     } else {
       if (request['isCurl']) {
-        response.send(DataFormatter.format(results, request.query));
+        response.send(DataFormatter.formatArticles(articles, request.query));
       } else {
         response.render('index', {
           header: `nycurl.sytes.net/${section}`,
           listSections: false,
-          data: results
+          data: articles
         });
       }
     }
@@ -154,8 +156,7 @@ app.post('/analytics', function(request, response) {
 
 app.use(function(request, response) {
   if (request['isCurl']) {
-    response.send('Invalid query! Valid queries:\n'.red +
-        ApiAccessor.SECTIONS.join('\n') + '\n');
+    response.send(DataFormatter.formatSections(ApiAccessor.SECTIONS, true));
   } else {
     response.render('index', {
       header: 'Invalid query! Valid sections to query:',
