@@ -145,7 +145,11 @@ app.get('/:section?', function(request, response, next) {
 });
 
 app.get('/analytics', function(request, response) {
-  response.render('analytics');
+  if (request['isCurl']) {
+    response.send(DataFormatter.formatSections(ApiAccessor.SECTIONS, false));
+  } else {
+    response.render('analytics');
+  }
 });
 
 app.post('/analytics', function(request, response) {
