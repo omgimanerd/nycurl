@@ -31,7 +31,6 @@ module.exports = {
           {
             loader: 'sass-loader',
             options: {
-              indentedSyntax: true,
               includePaths: [path.resolve(__dirname, './client/scss')]
             }
           }

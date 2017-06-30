@@ -32,7 +32,6 @@ var getTrafficData = function(data) {
 };
 
 var getFrequencyData = function(data) {
-  var sections = [];
   var frequencies = {};
   data.map(function(entry) {
     var matches = /[a-z]+/g.exec(entry.url);
