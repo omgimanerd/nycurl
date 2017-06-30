@@ -163,7 +163,7 @@ DataFormatter.formatArticles = function(articles, options) {
   }
   var number = parseInt(options['n'] || options['number']);
   if (isNaN(number) || number <= 0) {
-    number = data.length;
+    number = articles.length;
   }
 
   articles = articles.slice(index, index + number);

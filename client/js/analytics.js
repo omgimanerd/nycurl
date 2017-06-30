@@ -3,6 +3,15 @@
  * @author alvin@omgimanerd.tech (Alvin Lin)
  */
 
+require('chartist/dist/chartist.min.css');
+require('ubuntu-fontface/ubuntu.min.css');
+
+require('../scss/analytics.scss');
+
+const $ = require('jquery');
+const Chartist = require('chartist');
+const moment = require('moment');
+
 var getTrafficSeries = function(data) {
   var hitsPerDay = {};
   data.map(function(entry) {
@@ -29,6 +38,28 @@ $(document).ready(function() {
           return moment(value).format('MMM D');
         }
       }
+    });
+    var sectionChart = new Chartist.Bar('.section-freq', {
+      labels: [1, 2, 3, 4, 5, 6, 7],
+      series: [
+        [1, 3, 2, -5, -3, 1, -6],
+        [-5, -2, -4, -1, 2, -3, 1]
+      ]
+    }, {
+      seriesBarDistance: 12,
+      low: -10,
+      high: 10
+    });
+    var averageResponseChart = new Chartist.Bar('.response-time', {
+      labels: [1, 2, 3, 4, 5, 6, 7],
+      series: [
+        [1, 3, 2, -5, -3, 1, -6],
+        [-5, -2, -4, -1, 2, -3, 1]
+      ]
+    }, {
+      seriesBarDistance: 12,
+      low: -10,
+      high: 10
     });
   });
 });

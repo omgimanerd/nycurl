@@ -59,10 +59,10 @@ var server = http.Server(app);
 app.set('port', PORT);
 app.set('view engine', 'pug');
 
-app.use('/public', express.static(__dirname + '/public'));
+app.use('/dist', express.static(__dirname + '/dist'));
 app.use('/robots.txt', express.static(__dirname + '/robots.txt'));
 app.use('/favicon.ico',
-    express.static(`${__dirname}/public/images/favicon.ico`));
+    express.static(`${__dirname}/client/images/favicon.ico`));
 app.use(function(request, response, next) {
   request.userAgent = request.headers['user-agent'] || '';
   request.isCurl = request.userAgent.includes('curl');
@@ -78,7 +78,7 @@ app.use(morgan(function(tokens, request, response) {
   return JSON.stringify({
     date: (new Date()).toUTCString(),
     httpVersion: `${request.httpVersionMajor}.${request.httpVersionMinor}`,
-    method: request.method.,
+    method: request.method,
     referrer: request.headers.referer || request.headers.referrer,
     ip: request.headers['x-forwarded-for'] || request.headers.ip,
     responseTime: tokens['response-time'](request, response),

@@ -20,7 +20,8 @@ Get a list of acceptable sections to query using:
 curl nycurl.sytes.net/help
 ```
 By default, nycurl will format the table to be a max of 72 characters wide.
-If you would like to specify a custom width for your terminal, you do so using:
+If you would like to specify a custom width for your terminal, you can do so
+using:
 ```bash
 curl nycurl.sytes.net?w=92
 curl nycurl.sytes.net/technology?w=100

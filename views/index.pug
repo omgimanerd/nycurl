@@ -4,7 +4,6 @@ html
   head
     title NY Curl, New York Times for your Terminal
     link(rel="icon" type="image/x-icon" href="/public/favicon.ico")
-    link(rel="stylesheet" href="/public/css/index.css")
 
     meta(name="description"
          content="News from the New York Times optimized for display in Terminal")
@@ -41,7 +40,7 @@ html
       div
         a(class="github-button" href="https://github.com/omgimanerd"
           data-count-href="/omgimanerd/followers"
-          data-count-api="/users/omgimanerd#followers"
+          data-show-count="true"
           data-count-aria-label="# followers on GitHub"
           aria-label="Follow @omgimanerd on GitHub")
           | Follow @omgimanerd
@@ -49,7 +48,7 @@ html
         a(class="github-button" href="https://github.com/omgimanerd/nycurl"
           data-icon="octicon-star"
           data-count-href="/omgimanerd/nycurl/stargazers"
-          data-count-api="/repos/omgimanerd/nycurl#stargazers_count"
+          data-show-count="true"
           data-count-aria-label="# stargazers on GitHub"
           aria-label="Star omgimanerd/nycurl on GitHub")
           | Star
@@ -57,3 +56,4 @@ html
     !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?"http":"https";if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document, "script", "twitter-wjs");
   script(async defer id="github-bjs"
     src="https://buttons.github.io/buttons.js")
+  script(src="/dist/index.bundle.js")
