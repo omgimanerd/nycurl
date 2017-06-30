@@ -3,47 +3,34 @@
  * Author: alvin.lin.dev@gmail.com (Alvin Lin)
  */
 
-html, body {
-  width: 100%;
-  min-width: 800px;
-  margin: 0;
-  border: 0;
-  padding: 0;
-
-  font-size: 16px;
-  font-family: "Ubuntu Monospace", monospace, sans-serif;
-  background-color: #212121;
-  color: #FFFFFF;
-}
+@import 'base';
 
 .header {
-  color: #CC0219;
+  color: #cc0202;
   text-align: center;
   padding: 20px;
   margin: 0px;
 }
 
-.header a {
-
-}
-
 .container {
   text-align: center;
-}
 
-.container > div {
-  display: inline-block;
-  margin: 10px;
-  padding: 20px;
-  border-radius: 5px;
-  background-color: #d2d2d2;
-}
+  div {
+    display: inline-block;
+    margin: 10px;
+    padding: 20px;
+    border-radius: 5px;
+    background-color: #d2d2d2;
 
-.container h4 {
-  color: #333333;
-}
+    h4 {
+      color: $ANSI_RED;
+    }
 
-.container .ct-chart {
-  height: 500px;
-  width: 500px;
+    .ct-chart {
+      height: 30vw;
+      min-height: 400px;
+      width: 30vw;
+      min-width: 400px;
+    }
+  }
 }
