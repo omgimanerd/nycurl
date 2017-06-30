@@ -36,9 +36,9 @@ const logFileStream = fs.createWriteStream(logFile, { flags: 'a' });
 const analyticsFile = path.join(__dirname, ANALYTICS_FILE);
 const analyticsFileStream = fs.createWriteStream(analyticsFile, { flags: 'a' });
 
-const Analytics = require('./lib/Analytics');
-const ApiAccessor = require('./lib/ApiAccessor');
-const DataFormatter = require('./lib/DataFormatter')
+const Analytics = require('./server/Analytics');
+const ApiAccessor = require('./server/ApiAccessor');
+const DataFormatter = require('./server/DataFormatter')
 
 var analytics = Analytics.create(analyticsFile);
 var apiAccessor = ApiAccessor.create({
@@ -64,8 +64,8 @@ app.use('/robots.txt', express.static(__dirname + '/robots.txt'));
 app.use('/favicon.ico',
     express.static(`${__dirname}/public/images/favicon.ico`));
 app.use(function(request, response, next) {
-  request['userAgent'] = request.headers['user-agent'] || '';
-  request['isCurl'] = request.userAgent.includes('curl');
+  request.userAgent = request.headers['user-agent'] || '';
+  request.isCurl = request.userAgent.includes('curl');
   next();
 });
 
@@ -77,24 +77,23 @@ app.use(morgan('combined', { stream: logFileStream }));
 app.use(morgan(function(tokens, request, response) {
   return JSON.stringify({
     date: (new Date()).toUTCString(),
-    httpVersion: request['httpVersionMajor'] + '.' +
-        request['httpVersionMinor'],
-    method: request['method'],
-    referrer: request.headers['referer'] || request.headers['referrer'],
-    ip: request.headers['x-forwarded-for'] || request.headers['ip'],
+    httpVersion: `${request.httpVersionMajor}.${request.httpVersionMinor}`,
+    method: request.method.,
+    referrer: request.headers.referer || request.headers.referrer,
+    ip: request.headers['x-forwarded-for'] || request.headers.ip,
     responseTime: tokens['response-time'](request, response),
-    status: response['statusCode'],
-    url: request['url'] || request['originalUrl']
+    status: response.statusCode,
+    url: request.url || request.originalUrl
   });
 }, {
   skip: function(request, response) {
-    return !request['isCurl'];
+    return !request.isCurl;
   },
   stream: analyticsFileStream
 }));
 
 app.get('/help', function(request, response) {
-  if (request['isCurl']) {
+  if (request.isCurl) {
     response.send(DataFormatter.formatSections(ApiAccessor.SECTIONS, false));
   } else {
     response.render('index', {
@@ -115,7 +114,7 @@ app.get('/:section?', function(request, response, next) {
       if (DEV_MODE) {
         console.error(error);
       }
-      if (request['isCurl']) {
+      if (request.isCurl) {
         response.status(500).send(
             'An error occurred. Please try again later. '.red +
             '(Most likely we hit our rate limit)\n'.red);
@@ -126,7 +125,7 @@ app.get('/:section?', function(request, response, next) {
         });
       }
     } else {
-      if (request['isCurl']) {
+      if (request.isCurl) {
         response.send(DataFormatter.formatArticles(articles, request.query));
       } else {
         response.render('index', {
@@ -145,7 +144,7 @@ app.get('/:section?', function(request, response, next) {
 });
 
 app.get('/analytics', function(request, response) {
-  if (request['isCurl']) {
+  if (request.isCurl) {
     response.send(DataFormatter.formatSections(ApiAccessor.SECTIONS, false));
   } else {
     response.render('analytics');
@@ -159,7 +158,7 @@ app.post('/analytics', function(request, response) {
 });
 
 app.use(function(request, response) {
-  if (request['isCurl']) {
+  if (request.isCurl) {
     response.send(DataFormatter.formatSections(ApiAccessor.SECTIONS, true));
   } else {
     response.render('index', {

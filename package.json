@@ -18,7 +18,6 @@
   "homepage": "https://github.com/omgimanerd/nycurl#readme",
   "dependencies": {
     "async": "^1.5.2",
-    "bower": "^1.8.0",
     "cli-table2": "^0.2.0",
     "colors": "^1.1.2",
     "email-alerts": "^2.2.3",

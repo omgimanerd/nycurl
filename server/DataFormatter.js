@@ -144,15 +144,15 @@ DataFormatter.formatSections = function(sections, warning) {
  * It assumes that the data has the fields outlined in the documentation
  * on the NY Times developer documentation.
  * http://developer.nytimes.com/docs/top_stories_api/
- * @param {Array<Object>} data The list of results returned by a query to the
- *   NY Times API.
+ * @param {Array<Object>} articles The list of articles returned by a query to
+ *   the NY Times API.
  * @param {?Object=} options A dictionary containing configuration options.
  *   Valid keys are:
  *   - w (width, defaults to DEFAULT_DISPLAY_WIDTH)
  *   - width (width, defaults to DEFAULT_DISPLAY_WIDTH)
  * @return {string}
  */
-DataFormatter.formatArticles = function(data, options) {
+DataFormatter.formatArticles = function(articles, options) {
   var maxWidth = parseInt(options['w'] || options['width']);
   if (isNaN(maxWidth) || maxWidth <= 0) {
     maxWidth = DataFormatter.DEFAULT_DISPLAY_WIDTH;
@@ -166,7 +166,7 @@ DataFormatter.formatArticles = function(data, options) {
     number = data.length;
   }
 
-  var articles = data.slice(index, index + number);
+  articles = articles.slice(index, index + number);
   /**
    * We first calculate how wide the column containing the article numbers
    * will be, adding two to account for the cell padding.
@@ -182,7 +182,7 @@ DataFormatter.formatArticles = function(data, options) {
    * The borders of the table take up 4 characters, so we allocate the rest of
    * the space to the details column.
    */
-  var detailsWidth = (maxWidth - 4) - maxNumbersWidth - maxSectionsWidth;
+  var detailsWidth = maxWidth - maxNumbersWidth - maxSectionsWidth - 4;
   var table = new Table({
     colWidths: [maxNumbersWidth, maxSectionsWidth, detailsWidth]
   });
