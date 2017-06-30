@@ -8,11 +8,17 @@ require('ubuntu-fontface/ubuntu.min.css');
 
 require('../scss/analytics.scss');
 
+const SECTIONS = ['home', 'opinion', 'world', 'national', 'politics',
+  'upshot', 'nyregion', 'business', 'technology', 'science', 'health',
+  'sports', 'arts', 'books', 'movies', 'theater', 'sundayreview', 'fashion',
+  'tmagazine', 'food', 'travel', 'magazine', 'realestate', 'automobiles',
+  'obituaries', 'insider'];
+
 const $ = require('jquery');
 const Chartist = require('chartist');
 const moment = require('moment');
 
-var getTrafficSeries = function(data) {
+var getTrafficData = function(data) {
   var hitsPerDay = {};
   data.map(function(entry) {
     var day = moment(entry.date).startOf('day');
@@ -25,9 +31,33 @@ var getTrafficSeries = function(data) {
   return series;
 };
 
+var getFrequencyData = function(data) {
+  var sections = [];
+  var frequencies = {};
+  data.map(function(entry) {
+    var matches = /[a-z]+/g.exec(entry.url);
+    var url = 'home';
+    if (matches) {
+      url = matches[0];
+    }
+    if (frequencies[url]) {
+      frequencies[url]++;
+    } else {
+      frequencies[url] = 1;
+    }
+    if (!sections.includes(url)) {
+      sections.push(url);
+    }
+  });
+  return {
+    sections: sections,
+    frequencies: sections.map((section) => frequencies[section])
+  };
+};
+
 $(document).ready(function() {
   $.post('/analytics', function(data) {
-    var points = getTrafficSeries(data);
+    var points = getTrafficData(data);
     var scatterChart = new Chartist.Line('.traffic', {
       series: [points]
     }, {
@@ -39,6 +69,7 @@ $(document).ready(function() {
         }
       }
     });
+    console.log(getFrequencyData(data));
     var sectionChart = new Chartist.Bar('.section-freq', {
       labels: [1, 2, 3, 4, 5, 6, 7],
       series: [

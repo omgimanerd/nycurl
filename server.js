@@ -83,7 +83,8 @@ app.use(morgan(function(tokens, request, response) {
     ip: request.headers['x-forwarded-for'] || request.headers.ip,
     responseTime: tokens['response-time'](request, response),
     status: response.statusCode,
-    url: request.url || request.originalUrl
+    url: request.url || request.originalUrl,
+    path: request.path
   });
 }, {
   skip: function(request, response) {
