@@ -20,12 +20,6 @@ const SECTIONS = ['home', 'opinion', 'world', 'national', 'politics',
   'tmagazine', 'food', 'travel', 'magazine', 'realestate', 'automobiles',
   'obituaries', 'insider'];
 
-/**
- * @const
- * @type {number}
- */
-const SECONDS_IN_DAY = 60 * 60 * 24;
-
 const $ = require('jquery');
 const Chartist = require('chartist');
 const moment = require('moment');
@@ -168,7 +162,7 @@ $(document).ready(function() {
     var maxDate = moment(data[data.length - 1].date).unix();
     var dateFormatter = {
       to: function(value) {
-        return moment.unix(value).format("MMM D YYYY");
+        return moment.unix(value).format("M/D/YYYY");
       }
     };
 
@@ -176,7 +170,7 @@ $(document).ready(function() {
       start: [minDate, maxDate],
       tooltips: [dateFormatter, dateFormatter],
       connect: true,
-      margin: SECONDS_IN_DAY * 15,
+      margin: moment.duration(15, 'days').asSeconds(),
       range: { min: minDate, max: maxDate },
     });
 
