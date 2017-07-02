@@ -30,6 +30,7 @@
     "moment": "^2.18.1",
     "morgan": "^1.7.0",
     "node-sass": "^4.5.3",
+    "nouislider": "^10.0.0",
     "pug": "^2.0.0-beta6",
     "request": "^2.79.0",
     "sass-loader": "^6.0.6",

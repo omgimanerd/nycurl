@@ -4,6 +4,7 @@
  */
 
 require('chartist/dist/chartist.min.css');
+require('nouislider/distribute/nouislider.min.css');
 require('ubuntu-fontface/ubuntu.min.css');
 
 require('../scss/analytics.scss');
@@ -19,9 +20,16 @@ const SECTIONS = ['home', 'opinion', 'world', 'national', 'politics',
   'tmagazine', 'food', 'travel', 'magazine', 'realestate', 'automobiles',
   'obituaries', 'insider'];
 
+/**
+ * @const
+ * @type {number}
+ */
+const TEN_DAYS_SECONDS = 60 * 60 * 24 * 10;
+
 const $ = require('jquery');
 const Chartist = require('chartist');
 const moment = require('moment');
+const noUiSlider = require('nouislider');
 
 var getTrafficData = function(data) {
   var hitsPerDay = {};
@@ -36,6 +44,13 @@ var getTrafficData = function(data) {
   return series;
 };
 
+/**
+ * Given the array of analytics data fetched from the /analytics endpoint,
+ * this method returns the average response time per day as a series of
+ * points to plot on a Chartist.Line graph.
+ * @param {Array<Object>} data The raw analytics data.
+ * @return {Array<Object>}
+ */
 var getResponseTimeData = function(data) {
   var timesByDay = {};
   data.map(function(entry) {
@@ -56,6 +71,13 @@ var getResponseTimeData = function(data) {
   return series;
 };
 
+/**
+ * Given the array of analytics data fetched from the /analytics endpoint,
+ * this method returns the endpoint frequency data as an object containing
+ * the top 15 sections and their frequencies to plot on a Chartist.Bar graph.
+ * @param {Array<Object>} data The raw analytics data.
+ * @return {Object}
+ */
 var getFrequencyData = function(data) {
   var frequencies = {};
   data.map(function(entry) {
@@ -79,43 +101,82 @@ var getFrequencyData = function(data) {
   };
 };
 
+/**
+ * Given the array of analytics data fetched from the /analytics endpoint,
+ * this function updates all the graphs on the page using the data.
+ * @param {Array<Object>} data The raw analytics data.
+ */
+var updateGraphs = function(data) {
+  var trafficData = getTrafficData(data);
+  var scatterChart = new Chartist.Line('.traffic', {
+    series: [trafficData]
+  }, {
+    axisX: {
+      type: Chartist.FixedScaleAxis,
+      divisor: 10,
+      labelInterpolationFnc: function(value) {
+        return moment(value).format('MMM D');
+      }
+    },
+    showPoint: false
+  });
+
+  var responseTimeData = getResponseTimeData(data);
+  var averageResponseChart = new Chartist.Line('.response-time', {
+    series: [responseTimeData]
+  }, {
+    axisX: {
+      type: Chartist.FixedScaleAxis,
+      divisor: 10,
+      labelInterpolationFnc: function(value) {
+        return moment(value).format('MMM D');
+      }
+    },
+    showPoint: true
+  });
+
+  var frequencyData = getFrequencyData(data);
+  var sectionChart = new Chartist.Bar('.section-freq', {
+    labels: frequencyData.sections,
+    series: frequencyData.frequencies
+  }, {
+    distributeSeries: true
+  });
+};
+
+/**
+ * Main jQuery script to initialize the page elements.
+ */
 $(document).ready(function() {
+  var dateSlider = document.getElementById('date-slider');
   $.post('/analytics', function(data) {
-    var trafficData = getTrafficData(data);
-    var scatterChart = new Chartist.Line('.traffic', {
-      series: [trafficData]
-    }, {
-      axisX: {
-        type: Chartist.FixedScaleAxis,
-        divisor: 10,
-        labelInterpolationFnc: function(value) {
-          return moment(value).format('MMM D');
-        }
-      },
-      showPoint: false
+    var minDate = moment(data[0].date).unix();
+    var maxDate = moment(data[data.length - 1].date).unix();
+    var dateFormatter = {
+      to: function(value) {
+        return moment.unix(value).format("MMM D YYYY");
+      }
+    };
+
+    noUiSlider.create(dateSlider, {
+      start: [minDate, maxDate],
+      tooltips: [dateFormatter, dateFormatter],
+      connect: true,
+      margin: TEN_DAYS_SECONDS,
+      range: { min: minDate, max: maxDate },
     });
 
-    var responseTimeData = getResponseTimeData(data);
-    console.log(responseTimeData);
-    var averageResponseChart = new Chartist.Line('.response-time', {
-      series: [responseTimeData]
-    }, {
-      axisX: {
-        type: Chartist.FixedScaleAxis,
-        divisor: 10,
-        labelInterpolationFnc: function(value) {
-          return moment(value).format('MMM D');
-        }
-      },
-      showPoint: true
+    /**
+     * Event handler for our slider so that the graphs are appropriately
+     * updated.
+     */
+    dateSlider.noUiSlider.on('set', function() {
+      var sliderRange = dateSlider.noUiSlider.get();
+      updateGraphs(data.filter(function(entry) {
+        return moment(entry.date).isBetween(
+            moment.unix(sliderRange[0]), moment.unix(sliderRange[1]))
+      }));
     });
-
-    var frequencyData = getFrequencyData(data);
-    var sectionChart = new Chartist.Bar('.section-freq', {
-      labels: frequencyData.sections,
-      series: frequencyData.frequencies
-    }, {
-      distributeSeries: true
-    });
+    updateGraphs(data);
   });
 });

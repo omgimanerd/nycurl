@@ -12,14 +12,17 @@
   margin: 0px;
 }
 
+.date-slider-container {
+  margin: 50px auto;
+  width: 50vw;
+}
+
 .container {
   text-align: center;
 
   div {
     display: inline-block;
-    margin: 1vw;
-    border-radius: 5px;
-    background-color: #d2d2d2;
+    width: 100vw;
 
     h4 {
       color: $ANSI_RED;
@@ -30,6 +33,9 @@
       min-height: 400px;
       width: 80vw;
       min-width: 800px;
+      padding: 20px;
+      background-color: #d2d2d2;
+      border-radius: 5px;
     }
   }
 }
