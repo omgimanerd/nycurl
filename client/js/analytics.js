@@ -8,6 +8,11 @@ require('ubuntu-fontface/ubuntu.min.css');
 
 require('../scss/analytics.scss');
 
+/**
+ * Also defined in ApiAccessor on server side. Maybe do something about this?
+ * TODO
+ * @type {Array}
+ */
 const SECTIONS = ['home', 'opinion', 'world', 'national', 'politics',
   'upshot', 'nyregion', 'business', 'technology', 'science', 'health',
   'sports', 'arts', 'books', 'movies', 'theater', 'sundayreview', 'fashion',
@@ -31,6 +36,26 @@ var getTrafficData = function(data) {
   return series;
 };
 
+var getResponseTimeData = function(data) {
+  var timesByDay = {};
+  data.map(function(entry) {
+    var day = moment(entry.date).startOf('day');
+    if (timesByDay[day]) {
+      timesByDay[day].push(entry.responseTime || 0);
+    } else {
+      timesByDay[day] = [entry.responseTime || 0];
+    }
+  });
+  var series = [];
+  for (var day in timesByDay) {
+    series.push({
+      x: new Date(day),
+      y: timesByDay[day].reduce((a, b) => a+b) / timesByDay[day].length
+    });
+  }
+  return series;
+};
+
 var getFrequencyData = function(data) {
   var frequencies = {};
   data.map(function(entry) {
@@ -39,57 +64,58 @@ var getFrequencyData = function(data) {
     if (matches) {
       url = matches[0];
     }
-    if (frequencies[url]) {
-      frequencies[url]++;
-    } else {
-      frequencies[url] = 1;
-    }
-    if (!sections.includes(url)) {
-      sections.push(url);
+    if (SECTIONS.includes(url)) {
+      frequencies[url] = frequencies[url] ? frequencies[url] + 1 : 1;
     }
   });
+  var items = Object.keys(frequencies).map(function(key) {
+    return [key, frequencies[key]];
+  }).sort(function(a, b) {
+    return b[1] - a[1];
+  }).slice(0, 15);
   return {
-    sections: sections,
-    frequencies: sections.map((section) => frequencies[section])
+    sections: items.map((item) => item[0]),
+    frequencies: items.map((item) => item[1])
   };
 };
 
 $(document).ready(function() {
   $.post('/analytics', function(data) {
-    var points = getTrafficData(data);
+    var trafficData = getTrafficData(data);
     var scatterChart = new Chartist.Line('.traffic', {
-      series: [points]
+      series: [trafficData]
     }, {
       axisX: {
         type: Chartist.FixedScaleAxis,
-        divisor: 5,
+        divisor: 10,
         labelInterpolationFnc: function(value) {
           return moment(value).format('MMM D');
         }
-      }
+      },
+      showPoint: false
     });
-    console.log(getFrequencyData(data));
+
+    var responseTimeData = getResponseTimeData(data);
+    console.log(responseTimeData);
+    var averageResponseChart = new Chartist.Line('.response-time', {
+      series: [responseTimeData]
+    }, {
+      axisX: {
+        type: Chartist.FixedScaleAxis,
+        divisor: 10,
+        labelInterpolationFnc: function(value) {
+          return moment(value).format('MMM D');
+        }
+      },
+      showPoint: true
+    });
+
+    var frequencyData = getFrequencyData(data);
     var sectionChart = new Chartist.Bar('.section-freq', {
-      labels: [1, 2, 3, 4, 5, 6, 7],
-      series: [
-        [1, 3, 2, -5, -3, 1, -6],
-        [-5, -2, -4, -1, 2, -3, 1]
-      ]
+      labels: frequencyData.sections,
+      series: frequencyData.frequencies
     }, {
-      seriesBarDistance: 12,
-      low: -10,
-      high: 10
-    });
-    var averageResponseChart = new Chartist.Bar('.response-time', {
-      labels: [1, 2, 3, 4, 5, 6, 7],
-      series: [
-        [1, 3, 2, -5, -3, 1, -6],
-        [-5, -2, -4, -1, 2, -3, 1]
-      ]
-    }, {
-      seriesBarDistance: 12,
-      low: -10,
-      high: 10
+      distributeSeries: true
     });
   });
 });

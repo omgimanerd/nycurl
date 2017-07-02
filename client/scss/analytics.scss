@@ -6,7 +6,7 @@
 @import 'base';
 
 .header {
-  color: #cc0202;
+  color: $ANSI_RED;
   text-align: center;
   padding: 20px;
   margin: 0px;
@@ -17,8 +17,7 @@
 
   div {
     display: inline-block;
-    margin: 10px;
-    padding: 20px;
+    margin: 1vw;
     border-radius: 5px;
     background-color: #d2d2d2;
 
@@ -29,8 +28,8 @@
     .ct-chart {
       height: 30vw;
       min-height: 400px;
-      width: 30vw;
-      min-width: 400px;
+      width: 80vw;
+      min-width: 800px;
     }
   }
 }
