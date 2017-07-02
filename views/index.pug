@@ -21,17 +21,18 @@ html
         a(href="/help") Click here for a list of sections to query
       table(class="articles")
         tr
+          th #
           th Section
           th Details
-        tr
-          each value in data
-            tr
-              td(class="section")= value.section
-              td
-                div(class="title")= value.title
-                div(class="abstract")= value.abstract
-                div(class="url")
-                  a(href=value.url)= value.url
+        each value, index in data
+          tr
+            td(class="number")= index
+            td(class="section")= value.section
+            td
+              div(class="title")= value.title
+              div(class="abstract")= value.abstract
+              div(class="url")
+                a(href=value.url)= value.url
     div(class="media")
       div
         a(href="https://twitter.com/omgimanerd" class="twitter-follow-button"

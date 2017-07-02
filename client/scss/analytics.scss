@@ -15,6 +15,10 @@
 .date-slider-container {
   margin: 50px auto;
   width: 50vw;
+
+  h4 {
+    margin-bottom: 20px;
+  }
 }
 
 .container {
@@ -22,7 +26,6 @@
 
   div {
     display: inline-block;
-    width: 100vw;
 
     h4 {
       color: $ANSI_RED;
@@ -33,7 +36,8 @@
       min-height: 400px;
       width: 80vw;
       min-width: 800px;
-      padding: 20px;
+      padding: 40px;
+      margin-bottom: 150px;
       background-color: #d2d2d2;
       border-radius: 5px;
     }

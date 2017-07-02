@@ -81,7 +81,7 @@ app.use(morgan(function(tokens, request, response) {
     method: request.method,
     referrer: request.headers.referer || request.headers.referrer,
     ip: request.headers['x-forwarded-for'] || request.headers.ip,
-    responseTime: tokens['response-time'](request, response),
+    responseTime: parseFloat(tokens['response-time'](request, response)),
     status: response.statusCode,
     url: request.url || request.originalUrl
   });

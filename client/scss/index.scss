@@ -39,12 +39,17 @@
     border: 2px solid grey;
     padding: 15px;
 
+    &.number {
+      color: $ANSI_DARK_BLUE;
+    }
+
     &.section {
-      color: $ANSI_BLUE;
+      color: $ANSI_DARK_CYAN;
+      text-decoration: underline;
     }
 
     .title {
-      color: $ANSI_LIGHT_GREEN;
+      color: $ANSI_CYAN;
     }
   }
 }

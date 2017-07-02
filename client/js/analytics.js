@@ -24,7 +24,7 @@ const SECTIONS = ['home', 'opinion', 'world', 'national', 'politics',
  * @const
  * @type {number}
  */
-const TEN_DAYS_SECONDS = 60 * 60 * 24 * 10;
+const SECONDS_IN_DAY = 60 * 60 * 24;
 
 const $ = require('jquery');
 const Chartist = require('chartist');
@@ -56,19 +56,32 @@ var getResponseTimeData = function(data) {
   data.map(function(entry) {
     var day = moment(entry.date).startOf('day');
     if (timesByDay[day]) {
-      timesByDay[day].push(entry.responseTime || 0);
+      timesByDay[day].push(entry.responseTime || 1);
     } else {
-      timesByDay[day] = [entry.responseTime || 0];
+      timesByDay[day] = [entry.responseTime || 1];
     }
   });
-  var series = [];
+  var minSeries = [];
+  var avgSeries = [];
+  var maxSeries = [];
   for (var day in timesByDay) {
-    series.push({
+    var average = function(l) {
+      return l.reduce((a, b) => a + b) / l.length;
+    };
+    minSeries.push({
       x: new Date(day),
-      y: timesByDay[day].reduce((a, b) => a+b) / timesByDay[day].length
+      y: Math.min(...timesByDay[day])
+    });
+    avgSeries.push({
+      x: new Date(day),
+      y: average(timesByDay[day])
+    });
+    maxSeries.push({
+      x: new Date(day),
+      y: Math.max(...timesByDay[day])
     });
   }
-  return series;
+  return [minSeries, avgSeries, maxSeries];
 };
 
 /**
@@ -123,7 +136,7 @@ var updateGraphs = function(data) {
 
   var responseTimeData = getResponseTimeData(data);
   var averageResponseChart = new Chartist.Line('.response-time', {
-    series: [responseTimeData]
+    series: responseTimeData
   }, {
     axisX: {
       type: Chartist.FixedScaleAxis,
@@ -132,7 +145,8 @@ var updateGraphs = function(data) {
         return moment(value).format('MMM D');
       }
     },
-    showPoint: true
+    showPoint: false,
+    showArea: true
   });
 
   var frequencyData = getFrequencyData(data);
@@ -162,7 +176,7 @@ $(document).ready(function() {
       start: [minDate, maxDate],
       tooltips: [dateFormatter, dateFormatter],
       connect: true,
-      margin: TEN_DAYS_SECONDS,
+      margin: SECONDS_IN_DAY * 15,
       range: { min: minDate, max: maxDate },
     });
 
