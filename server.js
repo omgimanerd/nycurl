@@ -60,37 +60,42 @@ app.set('port', PORT);
 app.set('view engine', 'pug');
 
 app.use('/dist', express.static(__dirname + '/dist'));
+app.use('/favicon.ico', express.static(`${__dirname}/client/favicon.ico`));
 app.use('/robots.txt', express.static(__dirname + '/robots.txt'));
-app.use('/favicon.ico',
-    express.static(`${__dirname}/client/images/favicon.ico`));
-app.use(function(request, response, next) {
-  request.userAgent = request.headers['user-agent'] || '';
-  request.isCurl = request.userAgent.includes('curl');
-  next();
-});
 
 // Log general server information to the console.
 app.use(morgan('dev'));
+
 // Write more specific log information to the server log file.
-app.use(morgan('combined', { stream: logFileStream }));
-// Only write cURL requests to the analytics file.
+app.use(morgan('combined', {
+  stream: logFileStream
+}));
+
+// Write analytics-worthy requests to the analytics log file.
 app.use(morgan(function(tokens, request, response) {
   return JSON.stringify({
     date: (new Date()).toUTCString(),
     httpVersion: `${request.httpVersionMajor}.${request.httpVersionMinor}`,
+    ip: request.headers['x-forwarded-for'] || request.headers.ip,
     method: request.method,
     referrer: request.headers.referer || request.headers.referrer,
-    ip: request.headers['x-forwarded-for'] || request.headers.ip,
-    responseTime: parseFloat(tokens['response-time'](request, response)),
+    responseTime: tokens['response-time'](request, response),
     status: response.statusCode,
-    url: request.url || request.originalUrl
+    url: request.url || request.originalUrl,
+    userAgent: tokens['user-agent'](request, response)
   });
 }, {
   skip: function(request, response) {
-    return !request.isCurl;
+    return response.statusCode != 200;
   },
   stream: analyticsFileStream
 }));
+
+// If the request is a curl request, we it as a param in the request object.
+app.use(function(request, response, next) {
+  request.isCurl = (request.headers['user-agent'] || '').includes('curl');
+  next();
+});
 
 app.get('/help', function(request, response) {
   if (request.isCurl) {
@@ -159,9 +164,10 @@ app.post('/analytics', function(request, response) {
 
 app.use(function(request, response) {
   if (request.isCurl) {
-    response.send(DataFormatter.formatSections(ApiAccessor.SECTIONS, true));
+    response.status(400).send(
+      DataFormatter.formatSections(ApiAccessor.SECTIONS, true));
   } else {
-    response.render('index', {
+    response.status(400).render('index', {
       header: 'Invalid query! Valid sections to query:',
       listSections: true,
       sections: ApiAccessor.SECTIONS
