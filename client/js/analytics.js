@@ -5,9 +5,13 @@
 
 require('chartist/dist/chartist.min.css');
 require('nouislider/distribute/nouislider.min.css');
-require('ubuntu-fontface/ubuntu.min.css');
 
 require('../scss/analytics.scss');
+
+const $ = require('jquery');
+const Chartist = require('chartist');
+const moment = require('moment');
+const noUiSlider = require('nouislider');
 
 /**
  * Also defined in ApiAccessor on server side. Maybe do something about this?
@@ -19,11 +23,6 @@ const SECTIONS = ['home', 'opinion', 'world', 'national', 'politics',
   'sports', 'arts', 'books', 'movies', 'theater', 'sundayreview', 'fashion',
   'tmagazine', 'food', 'travel', 'magazine', 'realestate', 'automobiles',
   'obituaries', 'insider'];
-
-const $ = require('jquery');
-const Chartist = require('chartist');
-const moment = require('moment');
-const noUiSlider = require('nouislider');
 
 var getTrafficData = function(data) {
   var hitsPerDay = {};
