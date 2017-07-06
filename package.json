@@ -38,9 +38,5 @@
     "ubuntu-fontface": "^0.1.13",
     "webpack": "^3.0.0"
   },
-  "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-gjslint": "^0.1.5",
-    "merge-stream": "^1.0.1"
-  }
+  "devDependencies": {}
 }
