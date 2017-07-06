@@ -15,17 +15,21 @@ const d3 = require('d3');
 const moment = require('moment');
 const noUiSlider = require('nouislider');
 
-var trafficChart, responseTimeChart;
-
-var curveDate = function(date) {
-  return moment(date).startOf('day');
-};
-
-var iterDates = function(min, max, callback) {
+var iterByDay = function(min, max, callback) {
   var tmp = moment(min);
-  for (var day = tmp; day.diff(max, 'days') <= 0; day.add(1, 'days')) {
+  for (var day = tmp; day.isBefore(max); day.add(1, 'day')) {
     callback(day);
   }
+};
+
+var getDateRange = function(data) {
+  if (data.length < 2) {
+    return null;
+  }
+  return {
+    min: moment(data[0].date).startOf('day'),
+    max: moment(data[data.length - 1].date).endOf('day')
+  };
 };
 
 var min = function(l) {
@@ -34,12 +38,14 @@ var min = function(l) {
   }
   return Math.round(Math.min(...l));
 };
+
 var avg = function(l) {
   if (!l || l.length == 0) {
     return 0;
   }
   return Math.round(l.reduce((a, b) => a + b) / l.length);
 };
+
 var max = function(l) {
   if (!l || l.length == 0) {
     return 0;
@@ -51,7 +57,7 @@ var getTrafficData = function(data) {
   var hitsPerDay = {};
   var curlPerDay = {};
   data.map(function(entry) {
-    var day = curveDate(entry.date);
+    var day = moment(entry.date).startOf('day');
     hitsPerDay[day] = hitsPerDay[day] ? hitsPerDay[day] + 1 : 1;
     if ((entry.userAgent || '').includes('curl')) {
       curlPerDay[day] = curlPerDay[day] ? curlPerDay[day] + 1 : 1;
@@ -59,10 +65,9 @@ var getTrafficData = function(data) {
   });
   var dateColumn = ['date'];
   var hitsPerDayColumn = ['total requests'];
-  var curlPerDayColumn = ['curl requests '];
-  var minDate = moment(data[0].date).startOf('day');
-  var maxDate = moment(data[data.length - 1].date).endOf('day');
-  iterDates(minDate, maxDate, function(day) {
+  var curlPerDayColumn = ['curl requests'];
+  var range = getDateRange(data);
+  iterByDay(range.min, range.max, function(day) {
     dateColumn.push(day.format('YYYY-MM-DD'));
     hitsPerDayColumn.push(hitsPerDay[day] || 0);
     curlPerDayColumn.push(curlPerDay[day] || 0);
@@ -73,7 +78,7 @@ var getTrafficData = function(data) {
 var getResponseTimeData = function(data) {
   var timesByDay = {};
   data.map(function(entry) {
-    var day = curveDate(entry.date);
+    var day = moment(entry.date).startOf('day');
     if (timesByDay[day]) {
       timesByDay[day].push(entry.responseTime || 0);
     } else {
@@ -84,9 +89,8 @@ var getResponseTimeData = function(data) {
   var minColumn = ['min'];
   var avgColumn = ['avg'];
   var maxColumn = ['max'];
-  var minDate = moment(data[0].date).startOf('day');
-  var maxDate = moment(data[data.length - 1].date).endOf('day');
-  iterDates(minDate, maxDate, function(day) {
+  var range = getDateRange(data);
+  iterByDay(range.min, range.max, function(day) {
     dateColumn.push(day.format('YYYY-MM-DD'));
     minColumn.push(min(timesByDay[day]));
     avgColumn.push(avg(timesByDay[day]));
@@ -116,35 +120,6 @@ var getFrequencyData = function(data) {
   };
 };
 
-var updateGraphs = function(data) {
-  if (data.length == 0) {
-    console.error('No data!');
-    return;
-  }
-  // var responseTimeData = getResponseTimeData(data);
-  // var averageResponseChart = new Chartist.Line('.response-time', {
-  //   series: responseTimeData
-  // }, {
-  //   axisX: {
-  //     type: Chartist.FixedScaleAxis,
-  //     divisor: 10,
-  //     labelInterpolationFnc: function(value) {
-  //       return moment(value).format('MMM D');
-  //     }
-  //   },
-  //   showPoint: false,
-  //   showArea: true
-  // });
-  //
-  // var frequencyData = getFrequencyData(data);
-  // var sectionChart = new Chartist.Bar('.section-freq', {
-  //   labels: frequencyData.sections,
-  //   series: frequencyData.frequencies
-  // }, {
-  //   distributeSeries: true
-  // });
-};
-
 /**
  * Main jQuery script to initialize the page elements.
  */
@@ -152,24 +127,12 @@ $(document).ready(function() {
   var dateSlider = document.getElementById('date-slider');
   $.post('/analytics', function(data) {
     if (data.length == 0) {
-      console.error('No data!');
+      window.alert('No data!');
     }
-    var minDate = moment(data[0].date).startOf('day');
-    var maxDate = moment(data[data.length - 1].date).endOf('day');
-    var dateFormatter = {
-      to: function(value) {
-        return moment.unix(value).format("M/D/YYYY");
-      }
-    };
-    noUiSlider.create(dateSlider, {
-      start: [minDate.unix(), maxDate.unix()],
-      tooltips: [dateFormatter, dateFormatter],
-      connect: true,
-      margin: moment.duration(15, 'days').asSeconds(),
-      range: { min: minDate.unix(), max: maxDate.unix() }
-    });
-
-    trafficChart = c3.generate({
+    /**
+     * Initialize the c3 charts on the page with the analytics data.
+     */
+    var trafficChart = c3.generate({
       bindto: '#traffic',
       axis: {
         x: { padding: 0, type: 'timeseries' },
@@ -179,9 +142,12 @@ $(document).ready(function() {
         x: 'date',
         columns: getTrafficData(data)
       },
-      point: { show: false }
+      point: { show: false },
+      padding: {
+        right: 25
+      }
     });
-    responseTimeChart = c3.generate({
+    var responseTimeChart = c3.generate({
       bindto: '#response-time',
       axis: {
         x: { padding: 0, type: 'timeseries' },
@@ -196,15 +162,35 @@ $(document).ready(function() {
     });
 
     /**
-     * Event handler for our slider so that the graphs are appropriately
-     * updated.
+     * Initialize the slider with the proper parameters.
+     */
+    var range = getDateRange(data);
+    var dateFormatter = {
+      to: function(value) {
+        return moment.unix(value).format("M/D/YYYY");
+      }
+    };
+    noUiSlider.create(dateSlider, {
+      start: [range.min.unix(), range.max.unix()],
+      tooltips: [dateFormatter, dateFormatter],
+      connect: true,
+      margin: moment.duration(15, 'days').asSeconds(),
+      range: { min: range.min.unix(), max: range.max.unix() },
+      step: moment.duration(1, 'day').asSeconds()
+    });
+
+    /**
+     * Event handler for our slider so that the c3 charts are updated.
      */
     dateSlider.noUiSlider.on('set', function() {
-      var sliderRange = dateSlider.noUiSlider.get();
+      var sliderRange = dateSlider.noUiSlider.get().map((d) => moment.unix(d));
       var filteredData = data.filter(function(entry) {
-        return moment(entry.date).isBetween(
-            moment.unix(sliderRange[0]), moment.unix(sliderRange[1]));
+        return moment(entry.date).isBetween(sliderRange[0], sliderRange[1]);
       });
+      if (filteredData.length == 0) {
+        window.alert('This time segment has no data!');
+        return;
+      }
       trafficChart.load({
         columns: getTrafficData(filteredData),
         unload: true
