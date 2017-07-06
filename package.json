@@ -35,6 +35,7 @@
     "request": "^2.79.0",
     "sass-loader": "^6.0.6",
     "style-loader": "^0.18.2",
+    "ubuntu-fontface": "^0.1.13",
     "webpack": "^3.0.0"
   },
   "devDependencies": {

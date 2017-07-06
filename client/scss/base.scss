@@ -11,11 +11,6 @@ $ANSI_DARK_CYAN: #026D7B;
 $ANSI_CYAN: #29B5B5;
 $ANSI_RED: #CC0219;
 
-@font-face {
-  font-family: "Ubuntu Mono";
-  src: url('../fonts/ubuntumono-regular-webfont.woff') format('woff');
-}
-
 html, body {
   width: 100%;
   min-width: 800px;
@@ -24,7 +19,7 @@ html, body {
   padding: 0;
 
   font-size: 16px;
-  font-family: "Ubuntu Mono", monospace, sans-serif;
+  font-family: "Ubuntu Monospace", "Times", monospace, sans-serif;
   background-color: $BACKGROUND;
   color: #FFFFFF;
 }

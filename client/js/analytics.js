@@ -5,6 +5,7 @@
 
 require('chartist/dist/chartist.min.css');
 require('nouislider/distribute/nouislider.min.css');
+require('ubuntu-fontface/_ubuntu-mono.scss')
 
 require('../scss/analytics.scss');
 

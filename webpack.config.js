@@ -12,7 +12,8 @@ module.exports = {
   },
   output: {
     filename: '[name].bundle.js',
-    path: path.join(__dirname, '/dist')
+    path: path.join(__dirname, 'dist'),
+    publicPath: '/dist/'
   },
   module: {
     rules: [
@@ -38,11 +39,14 @@ module.exports = {
       },
       {
         test: /\.(ttf|woff|woff2|svg|eot)$/,
-        loader: 'file-loader',
-        options: {
-          name: 'fonts/[name].[ext]'
+        use: {
+          loader: 'file-loader',
+          options: {
+            name: '[name].[ext]'
+          }
         }
       }
     ]
-  }
+  },
+  devtool: 'cheap-eval-source-map'
 }

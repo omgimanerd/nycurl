@@ -61,9 +61,13 @@ app.set('port', PORT);
 app.set('view engine', 'pug');
 
 app.use('/dist', express.static(__dirname + '/dist'));
-app.use('/fonts', express.static(__dirname + '/client/fonts'));
 app.use('/favicon.ico', express.static(__dirname + '/client/favicon.ico'));
 app.use('/robots.txt', express.static(__dirname + '/robots.txt'));
+
+app.use(function(request, response, next) {
+  console.log(request.path);
+  next();
+});
 
 // Log general server information to the console.
 app.use(morgan('dev'));

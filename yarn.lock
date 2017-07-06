@@ -3904,6 +3904,10 @@ type-is@~1.6.15:
     media-typer "0.3.0"
     mime-types "~2.1.15"
 
+ubuntu-fontface@^0.1.13:
+  version "0.1.13"
+  resolved "https://registry.yarnpkg.com/ubuntu-fontface/-/ubuntu-fontface-0.1.13.tgz#8ebbb3defc1e2cbbc9ddbe48025433946279c09b"
+
 uglify-js@^2.6.1, uglify-js@^2.8.29:
   version "2.8.29"
   resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-2.8.29.tgz#29c5733148057bb4e1f75df35b7a9cb72e6a59dd"
