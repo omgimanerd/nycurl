@@ -53,10 +53,7 @@ Analytics.prototype.getAnalytics = function(callback) {
       return callback(error);
     }
     try {
-      data = data.trim().split('\n').map(JSON.parse).map(function(entry) {
-        entry.date = new Date(entry.date);
-        return entry;
-      });
+      data = data.trim().split('\n').map(JSON.parse);
     } catch (error) {
       return callback(error);
     }

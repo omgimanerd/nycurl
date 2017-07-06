@@ -28,7 +28,6 @@ const emailAlerts = require('email-alerts');
 const express = require('express');
 const fs = require('fs');
 const http = require('http');
-const moment = require('moment');
 const morgan = require('morgan');
 const path = require('path');
 
@@ -59,15 +58,11 @@ var server = http.Server(app);
 
 app.set('port', PORT);
 app.set('view engine', 'pug');
+app.disable('etag');
 
 app.use('/dist', express.static(__dirname + '/dist'));
 app.use('/favicon.ico', express.static(__dirname + '/client/favicon.ico'));
 app.use('/robots.txt', express.static(__dirname + '/robots.txt'));
-
-app.use(function(request, response, next) {
-  console.log(request.path);
-  next();
-});
 
 // Log general server information to the console.
 app.use(morgan('dev'));
@@ -80,7 +75,7 @@ app.use(morgan('combined', {
 // Write analytics-worthy requests to the analytics log file.
 app.use(morgan(function(tokens, request, response) {
   return JSON.stringify({
-    date: moment().toString(),
+    date: new Date(),
     httpVersion: `${request.httpVersionMajor}.${request.httpVersionMinor}`,
     ip: request.headers['x-forwarded-for'] || request.headers.ip,
     method: request.method,

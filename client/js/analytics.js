@@ -28,7 +28,7 @@ const SECTIONS = ['home', 'opinion', 'world', 'national', 'politics',
 var getTrafficData = function(data) {
   var hitsPerDay = {};
   data.map(function(entry) {
-    var day = moment(entry.date).startOf('day');
+    var day = moment(entry.date).endOf('day');
     hitsPerDay[day] = hitsPerDay[day] ? hitsPerDay[day] + 1 : 1;
   });
   var series = [];
@@ -48,7 +48,7 @@ var getTrafficData = function(data) {
 var getResponseTimeData = function(data) {
   var timesByDay = {};
   data.map(function(entry) {
-    var day = moment(entry.date).startOf('day');
+    var day = moment(entry.date).endOf('day');
     if (timesByDay[day]) {
       timesByDay[day].push(entry.responseTime || 1);
     } else {
