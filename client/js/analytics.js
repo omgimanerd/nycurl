@@ -54,13 +54,13 @@ var getResponseTimeData = function(data) {
       timesByDay[day] = [entry.responseTime || 1];
     }
   });
+  var average = function(l) {
+    return l.reduce((a, b) => a + b) / l.length;
+  };
   var minSeries = [];
   var avgSeries = [];
   var maxSeries = [];
   for (var day in timesByDay) {
-    var average = function(l) {
-      return l.reduce((a, b) => a + b) / l.length;
-    };
     minSeries.push({
       x: new Date(day),
       y: Math.min(...timesByDay[day])
@@ -123,6 +123,9 @@ var updateGraphs = function(data) {
       labelInterpolationFnc: function(value) {
         return moment(value).format('MMM D');
       }
+    },
+    axisY: {
+      onlyInteger: true
     },
     showPoint: false
   });

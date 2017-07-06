@@ -28,6 +28,7 @@ const emailAlerts = require('email-alerts');
 const express = require('express');
 const fs = require('fs');
 const http = require('http');
+const moment = require('moment');
 const morgan = require('morgan');
 const path = require('path');
 
@@ -75,12 +76,12 @@ app.use(morgan('combined', {
 // Write analytics-worthy requests to the analytics log file.
 app.use(morgan(function(tokens, request, response) {
   return JSON.stringify({
-    date: (new Date()).toUTCString(),
+    date: moment().toString(),
     httpVersion: `${request.httpVersionMajor}.${request.httpVersionMinor}`,
     ip: request.headers['x-forwarded-for'] || request.headers.ip,
     method: request.method,
     referrer: request.headers.referer || request.headers.referrer,
-    responseTime: tokens['response-time'](request, response),
+    responseTime: parseFloat(tokens['response-time'](request, response)),
     status: response.statusCode,
     url: request.url || request.originalUrl,
     userAgent: tokens['user-agent'](request, response)
@@ -151,15 +152,16 @@ app.get('/:section?', function(request, response, next) {
 
 app.get('/analytics', function(request, response) {
   if (request.isCurl) {
-    response.send(DataFormatter.formatSections(ApiAccessor.SECTIONS, false));
+    response.status(201).send(
+        DataFormatter.formatSections(ApiAccessor.SECTIONS, false));
   } else {
-    response.render('analytics');
+    response.status(201).render('analytics');
   }
 });
 
 app.post('/analytics', function(request, response) {
   analytics.getAnalytics(function(error, data) {
-    response.send(data);
+    response.status(201).send(data);
   });
 });
 
