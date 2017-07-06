@@ -24,22 +24,22 @@
 .container {
   text-align: center;
 
-  div {
+  .graphs {
     display: inline-block;
+    margin-bottom: 150px;
+    background-color: #d2d2d2;
+    border-radius: 5px;
+    padding: 20px;
 
     h4 {
       color: $ANSI_RED;
     }
 
-    .ct-chart {
+    .graph {
       height: 30vw;
       min-height: 400px;
       width: 80vw;
       min-width: 800px;
-      padding: 40px;
-      margin-bottom: 150px;
-      background-color: #d2d2d2;
-      border-radius: 5px;
     }
   }
 }

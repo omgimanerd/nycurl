@@ -68,9 +68,7 @@ app.use('/robots.txt', express.static(__dirname + '/robots.txt'));
 app.use(morgan('dev'));
 
 // Write more specific log information to the server log file.
-app.use(morgan('combined', {
-  stream: logFileStream
-}));
+app.use(morgan('combined', { stream: logFileStream }));
 
 // Write analytics-worthy requests to the analytics log file.
 app.use(morgan(function(tokens, request, response) {

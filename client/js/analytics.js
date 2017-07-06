@@ -3,88 +3,98 @@
  * @author alvin@omgimanerd.tech (Alvin Lin)
  */
 
-require('chartist/dist/chartist.min.css');
+require('c3/c3.min.css');
 require('nouislider/distribute/nouislider.min.css');
 require('ubuntu-fontface/_ubuntu-mono.scss')
 
 require('../scss/analytics.scss');
 
 const $ = require('jquery');
-const Chartist = require('chartist');
+const c3 = require('c3');
+const d3 = require('d3');
 const moment = require('moment');
 const noUiSlider = require('nouislider');
 
-/**
- * Also defined in ApiAccessor on server side. Maybe do something about this?
- * TODO
- * @type {Array}
- */
-const SECTIONS = ['home', 'opinion', 'world', 'national', 'politics',
-  'upshot', 'nyregion', 'business', 'technology', 'science', 'health',
-  'sports', 'arts', 'books', 'movies', 'theater', 'sundayreview', 'fashion',
-  'tmagazine', 'food', 'travel', 'magazine', 'realestate', 'automobiles',
-  'obituaries', 'insider'];
+var trafficChart, responseTimeChart;
+
+var curveDate = function(date) {
+  return moment(date).startOf('day');
+};
+
+var iterDates = function(min, max, callback) {
+  var tmp = moment(min);
+  for (var day = tmp; day.diff(max, 'days') <= 0; day.add(1, 'days')) {
+    callback(day);
+  }
+};
+
+var min = function(l) {
+  if (!l || l.length == 0) {
+    return 0;
+  }
+  return Math.round(Math.min(...l));
+};
+var avg = function(l) {
+  if (!l || l.length == 0) {
+    return 0;
+  }
+  return Math.round(l.reduce((a, b) => a + b) / l.length);
+};
+var max = function(l) {
+  if (!l || l.length == 0) {
+    return 0;
+  }
+  return Math.round(Math.max(...l));
+};
 
 var getTrafficData = function(data) {
   var hitsPerDay = {};
+  var curlPerDay = {};
   data.map(function(entry) {
-    var day = moment(entry.date).endOf('day');
+    var day = curveDate(entry.date);
     hitsPerDay[day] = hitsPerDay[day] ? hitsPerDay[day] + 1 : 1;
+    if ((entry.userAgent || '').includes('curl')) {
+      curlPerDay[day] = curlPerDay[day] ? curlPerDay[day] + 1 : 1;
+    }
   });
-  var series = [];
-  for (var day in hitsPerDay) {
-    series.push({ x: new Date(day), y: hitsPerDay[day] });
-  }
-  return series;
+  var dateColumn = ['date'];
+  var hitsPerDayColumn = ['total requests'];
+  var curlPerDayColumn = ['curl requests '];
+  var minDate = moment(data[0].date).startOf('day');
+  var maxDate = moment(data[data.length - 1].date).endOf('day');
+  iterDates(minDate, maxDate, function(day) {
+    dateColumn.push(day.format('YYYY-MM-DD'));
+    hitsPerDayColumn.push(hitsPerDay[day] || 0);
+    curlPerDayColumn.push(curlPerDay[day] || 0);
+  });
+  return [dateColumn, hitsPerDayColumn, curlPerDayColumn];
 };
 
-/**
- * Given the array of analytics data fetched from the /analytics endpoint,
- * this method returns the average response time per day as a series of
- * points to plot on a Chartist.Line graph.
- * @param {Array<Object>} data The raw analytics data.
- * @return {Array<Object>}
- */
 var getResponseTimeData = function(data) {
   var timesByDay = {};
   data.map(function(entry) {
-    var day = moment(entry.date).endOf('day');
+    var day = curveDate(entry.date);
     if (timesByDay[day]) {
-      timesByDay[day].push(entry.responseTime || 1);
+      timesByDay[day].push(entry.responseTime || 0);
     } else {
-      timesByDay[day] = [entry.responseTime || 1];
+      timesByDay[day] = [entry.responseTime || 0];
     }
   });
-  var average = function(l) {
-    return l.reduce((a, b) => a + b) / l.length;
-  };
-  var minSeries = [];
-  var avgSeries = [];
-  var maxSeries = [];
-  for (var day in timesByDay) {
-    minSeries.push({
-      x: new Date(day),
-      y: Math.min(...timesByDay[day])
-    });
-    avgSeries.push({
-      x: new Date(day),
-      y: average(timesByDay[day])
-    });
-    maxSeries.push({
-      x: new Date(day),
-      y: Math.max(...timesByDay[day])
-    });
-  }
-  return [minSeries, avgSeries, maxSeries];
+  var dateColumn = ['date'];
+  var minColumn = ['min'];
+  var avgColumn = ['avg'];
+  var maxColumn = ['max'];
+  var minDate = moment(data[0].date).startOf('day');
+  var maxDate = moment(data[data.length - 1].date).endOf('day');
+  iterDates(minDate, maxDate, function(day) {
+    dateColumn.push(day.format('YYYY-MM-DD'));
+    minColumn.push(min(timesByDay[day]));
+    avgColumn.push(avg(timesByDay[day]));
+    maxColumn.push(max(timesByDay[day]));
+  });
+  return [dateColumn, minColumn, avgColumn, maxColumn];
 };
 
-/**
- * Given the array of analytics data fetched from the /analytics endpoint,
- * this method returns the endpoint frequency data as an object containing
- * the top 15 sections and their frequencies to plot on a Chartist.Bar graph.
- * @param {Array<Object>} data The raw analytics data.
- * @return {Object}
- */
 var getFrequencyData = function(data) {
   var frequencies = {};
   data.map(function(entry) {
@@ -93,9 +103,7 @@ var getFrequencyData = function(data) {
     if (matches) {
       url = matches[0];
     }
-    if (SECTIONS.includes(url)) {
-      frequencies[url] = frequencies[url] ? frequencies[url] + 1 : 1;
-    }
+    frequencies[url] = frequencies[url] ? frequencies[url] + 1 : 1;
   });
   var items = Object.keys(frequencies).map(function(key) {
     return [key, frequencies[key]];
@@ -108,51 +116,33 @@ var getFrequencyData = function(data) {
   };
 };
 
-/**
- * Given the array of analytics data fetched from the /analytics endpoint,
- * this function updates all the graphs on the page using the data.
- * @param {Array<Object>} data The raw analytics data.
- */
 var updateGraphs = function(data) {
-  var trafficData = getTrafficData(data);
-  var scatterChart = new Chartist.Line('.traffic', {
-    series: [trafficData]
-  }, {
-    axisX: {
-      type: Chartist.FixedScaleAxis,
-      divisor: 10,
-      labelInterpolationFnc: function(value) {
-        return moment(value).format('MMM D');
-      }
-    },
-    axisY: {
-      onlyInteger: true
-    },
-    showPoint: false
-  });
-
-  var responseTimeData = getResponseTimeData(data);
-  var averageResponseChart = new Chartist.Line('.response-time', {
-    series: responseTimeData
-  }, {
-    axisX: {
-      type: Chartist.FixedScaleAxis,
-      divisor: 10,
-      labelInterpolationFnc: function(value) {
-        return moment(value).format('MMM D');
-      }
-    },
-    showPoint: false,
-    showArea: true
-  });
-
-  var frequencyData = getFrequencyData(data);
-  var sectionChart = new Chartist.Bar('.section-freq', {
-    labels: frequencyData.sections,
-    series: frequencyData.frequencies
-  }, {
-    distributeSeries: true
-  });
+  if (data.length == 0) {
+    console.error('No data!');
+    return;
+  }
+  // var responseTimeData = getResponseTimeData(data);
+  // var averageResponseChart = new Chartist.Line('.response-time', {
+  //   series: responseTimeData
+  // }, {
+  //   axisX: {
+  //     type: Chartist.FixedScaleAxis,
+  //     divisor: 10,
+  //     labelInterpolationFnc: function(value) {
+  //       return moment(value).format('MMM D');
+  //     }
+  //   },
+  //   showPoint: false,
+  //   showArea: true
+  // });
+  //
+  // var frequencyData = getFrequencyData(data);
+  // var sectionChart = new Chartist.Bar('.section-freq', {
+  //   labels: frequencyData.sections,
+  //   series: frequencyData.frequencies
+  // }, {
+  //   distributeSeries: true
+  // });
 };
 
 /**
@@ -161,20 +151,48 @@ var updateGraphs = function(data) {
 $(document).ready(function() {
   var dateSlider = document.getElementById('date-slider');
   $.post('/analytics', function(data) {
-    var minDate = moment(data[0].date).unix();
-    var maxDate = moment(data[data.length - 1].date).unix();
+    if (data.length == 0) {
+      console.error('No data!');
+    }
+    var minDate = moment(data[0].date).startOf('day');
+    var maxDate = moment(data[data.length - 1].date).endOf('day');
     var dateFormatter = {
       to: function(value) {
         return moment.unix(value).format("M/D/YYYY");
       }
     };
-
     noUiSlider.create(dateSlider, {
-      start: [minDate, maxDate],
+      start: [minDate.unix(), maxDate.unix()],
       tooltips: [dateFormatter, dateFormatter],
       connect: true,
       margin: moment.duration(15, 'days').asSeconds(),
-      range: { min: minDate, max: maxDate },
+      range: { min: minDate.unix(), max: maxDate.unix() }
+    });
+
+    trafficChart = c3.generate({
+      bindto: '#traffic',
+      axis: {
+        x: { padding: 0, type: 'timeseries' },
+        y: { label: 'Requests', min: 0, padding: 0 }
+      },
+      data: {
+        x: 'date',
+        columns: getTrafficData(data)
+      },
+      point: { show: false }
+    });
+    responseTimeChart = c3.generate({
+      bindto: '#response-time',
+      axis: {
+        x: { padding: 0, type: 'timeseries' },
+        y: { label: 'Milliseconds', min: 0, padding: 0 }
+      },
+      data: {
+        x: 'date',
+        columns: getResponseTimeData(data),
+        types: 'area'
+      },
+      point: { show: false }
     });
 
     /**
@@ -183,11 +201,18 @@ $(document).ready(function() {
      */
     dateSlider.noUiSlider.on('set', function() {
       var sliderRange = dateSlider.noUiSlider.get();
-      updateGraphs(data.filter(function(entry) {
+      var filteredData = data.filter(function(entry) {
         return moment(entry.date).isBetween(
-            moment.unix(sliderRange[0]), moment.unix(sliderRange[1]))
-      }));
+            moment.unix(sliderRange[0]), moment.unix(sliderRange[1]));
+      });
+      trafficChart.load({
+        columns: getTrafficData(filteredData),
+        unload: true
+      });
+      responseTimeChart.load({
+        columns: getResponseTimeData(filteredData),
+        unload: true
+      });
     });
-    updateGraphs(data);
   });
 });
