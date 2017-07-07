@@ -27,6 +27,7 @@
     "email-alerts": "^2.2.3",
     "express": "^4.14.0",
     "file-loader": "^0.11.2",
+    "geoip-native": "^0.0.8",
     "jquery": "^3.2.1",
     "moment": "^2.18.1",
     "morgan": "^1.7.0",

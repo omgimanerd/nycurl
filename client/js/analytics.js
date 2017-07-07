@@ -113,9 +113,27 @@ var getSectionFrequencyData = function(data) {
     return [section, frequencies[section]];
   }).sort(function(a, b) {
     return b[1] - a[1];
-  }).slice(0, 15);
+  }).slice(0, 10);
   return [
     ['sections'].concat(items.map(item => item[0])),
+    ['frequency'].concat(items.map(item => item[1]))
+  ];
+};
+
+var getCountryFrequencyData = function(data) {
+  var frequencies = {};
+  data.map(function(entry) {
+    var country = entry.country || 'unknown';
+    frequencies[country] = frequencies[country] ? frequencies[country] + 1 : 1;
+  });
+  var items = Object.keys(frequencies).map(function(country) {
+    return [country, frequencies[country]];
+  }).sort(function(a, b) {
+    return b[1] - a[1];
+  }).slice(0, 10);
+  console.log(items);
+  return [
+    ['countries'].concat(items.map(item => item[0])),
     ['frequency'].concat(items.map(item => item[1]))
   ];
 };
@@ -170,7 +188,18 @@ $(document).ready(function() {
         x: 'sections',
         columns: getSectionFrequencyData(data),
         type: 'bar'
-      }
+      },
+      padding: { bottom: 15 }
+    });
+    var countryFrequencyChart = c3.generate({
+      bindto: '#country-frequency',
+      axis: { x: { type: 'category', tick: { multiline: true } } },
+      data: {
+        x: 'countries',
+        columns: getCountryFrequencyData(data),
+        type: 'bar'
+      },
+      padding: { bottom: 15 }
     });
 
     /**
@@ -186,7 +215,7 @@ $(document).ready(function() {
       start: [range.min.unix(), range.max.unix()],
       tooltips: [dateFormatter, dateFormatter],
       connect: true,
-      margin: moment.duration(15, 'days').asSeconds(),
+      margin: moment.duration(10, 'days').asSeconds(),
       range: { min: range.min.unix(), max: range.max.unix() },
       step: moment.duration(1, 'day').asSeconds()
     });
@@ -213,6 +242,10 @@ $(document).ready(function() {
       });
       sectionFrequencyChart.load({
         columns: getSectionFrequencyData(filteredData),
+        unload: true
+      });
+      countryFrequencyChart.load({
+        columns: getCountryFrequencyData(filteredData),
         unload: true
       });
     });

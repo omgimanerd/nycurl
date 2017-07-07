@@ -5,6 +5,7 @@
  */
 
 const fs = require('fs');
+const geoip = require('geoip-native');
 
 /**
  * Constructor for an Analytics object.
@@ -53,7 +54,11 @@ Analytics.prototype.getAnalytics = function(callback) {
       return callback(error);
     }
     try {
-      data = data.trim().split('\n').map(JSON.parse);
+      data = data.trim().split('\n').map(function(entry) {
+        entry = JSON.parse(entry);
+        entry.country = geoip.lookup(entry.ip).name;
+        return entry;
+      });
     } catch (error) {
       return callback(error);
     }
