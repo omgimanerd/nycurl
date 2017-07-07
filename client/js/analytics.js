@@ -99,7 +99,7 @@ var getResponseTimeData = function(data) {
   return [dateColumn, minColumn, avgColumn, maxColumn];
 };
 
-var getFrequencyData = function(data) {
+var getSectionFrequencyData = function(data) {
   var frequencies = {};
   data.map(function(entry) {
     var matches = /[a-z]+/g.exec(entry.url);
@@ -109,15 +109,15 @@ var getFrequencyData = function(data) {
     }
     frequencies[url] = frequencies[url] ? frequencies[url] + 1 : 1;
   });
-  var items = Object.keys(frequencies).map(function(key) {
-    return [key, frequencies[key]];
+  var items = Object.keys(frequencies).map(function(section) {
+    return [section, frequencies[section]];
   }).sort(function(a, b) {
     return b[1] - a[1];
   }).slice(0, 15);
-  return {
-    sections: items.map((item) => item[0]),
-    frequencies: items.map((item) => item[1])
-  };
+  return [
+    ['sections'].concat(items.map(item => item[0])),
+    ['frequency'].concat(items.map(item => item[1]))
+  ];
 };
 
 /**
@@ -156,9 +156,21 @@ $(document).ready(function() {
       data: {
         x: 'date',
         columns: getResponseTimeData(data),
-        types: 'area'
+        type: 'area',
+        groups: [['min', 'avg', 'max']]
       },
       point: { show: false }
+    });
+    var sectionFrequencyChart = c3.generate({
+      bindto: '#section-frequency',
+      axis: {
+        x: { type: 'category', tick: { multiline: true } }
+      },
+      data: {
+        x: 'sections',
+        columns: getSectionFrequencyData(data),
+        type: 'bar'
+      }
     });
 
     /**
@@ -197,6 +209,10 @@ $(document).ready(function() {
       });
       responseTimeChart.load({
         columns: getResponseTimeData(filteredData),
+        unload: true
+      });
+      sectionFrequencyChart.load({
+        columns: getSectionFrequencyData(filteredData),
         unload: true
       });
     });
