@@ -49,12 +49,12 @@ Analytics.prototype.getAnalytics = function(callback) {
   if (this.cache.analytics && currentTime < this.cache.expires) {
     return callback(null, this.cache.analytics);
   }
-  fs.readFile(this.analyticsFile, 'utf-8', function(error, data) {
+  fs.readFile(this.analyticsFile, 'utf-8', (error, data) => {
     if (error) {
       return callback(error);
     }
     try {
-      data = data.trim().split('\n').map(function(entry) {
+      data = data.trim().split('\n').map(entry => {
         entry = JSON.parse(entry);
         entry.country = geoip.lookup(entry.ip).name;
         return entry;

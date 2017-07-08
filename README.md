@@ -51,15 +51,14 @@ export URL_SHORTENER_API_KEY=YOUR_KEY_HERE
 
 Install the project dependencies:
 ```
-npm install
-bower install
+npm install # or yarn install
+webpack
 ```
 
 Run the server in development node:
 ```
-node server.js --dev
+node server.js
 ```
-**IF YOU DON'T USE DEV MODE, YOU WON'T BE ABLE TO GET IT WORKING**
 
 ## License
 [MIT](https://github.com/omgimanerd/nycurl/blob/master/LICENSE)

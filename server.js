@@ -16,7 +16,7 @@ const URL_SHORTENER_API_KEY = process.env.URL_SHORTENER_API_KEY;
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const ALERT_EMAIL = process.env.ALERT_EMAIL;
 
-const DEV_MODE = process.argv.includes('--dev');
+const PROD_MODE = process.argv.includes('--prod');
 const PORT = process.env.PORT || 5000;
 
 const LOG_FILE = 'logs/server.log';
@@ -46,7 +46,7 @@ var apiAccessor = ApiAccessor.create({
   url_shortener_api_key: URL_SHORTENER_API_KEY
 });
 var app = express();
-if (!DEV_MODE) {
+if (PROD_MODE) {
   var alert = emailAlerts({
     fromEmail: 'alert@nycurl.sytes.net',
     toEmail: ALERT_EMAIL,
@@ -71,7 +71,7 @@ app.use(morgan('dev'));
 app.use(morgan('combined', { stream: logFileStream }));
 
 // Write analytics-worthy requests to the analytics log file.
-app.use(morgan(function(tokens, request, response) {
+app.use(morgan((tokens, request, response) => {
   return JSON.stringify({
     date: new Date(),
     httpVersion: `${request.httpVersionMajor}.${request.httpVersionMinor}`,
@@ -84,19 +84,19 @@ app.use(morgan(function(tokens, request, response) {
     userAgent: tokens['user-agent'](request, response)
   });
 }, {
-  skip: function(request, response) {
+  skip: (request, response) => {
     return response.statusCode != 200;
   },
   stream: analyticsFileStream
 }));
 
 // If the request is a curl request, we it as a param in the request object.
-app.use(function(request, response, next) {
+app.use((request, response, next) => {
   request.isCurl = (request.headers['user-agent'] || '').includes('curl');
   next();
 });
 
-app.get('/help', function(request, response) {
+app.get('/help', (request, response) => {
   if (request.isCurl) {
     response.send(DataFormatter.formatSections(ApiAccessor.SECTIONS, false));
   } else {
@@ -108,12 +108,12 @@ app.get('/help', function(request, response) {
   }
 });
 
-app.get('/:section?', function(request, response, next) {
+app.get('/:section?', (request, response, next) => {
   var section = request.params.section || 'home';
   if (!ApiAccessor.isValidSection(section)) {
     return next();
   }
-  var callback = function(error, articles) {
+  var callback = (error, articles) => {
     if (error) {
       if (DEV_MODE) {
         console.error(error);
@@ -140,14 +140,14 @@ app.get('/:section?', function(request, response, next) {
       }
     }
   };
-  if (!DEV_MODE) {
+  if (PROD_MODE) {
     apiAccessor.fetch(section, alert.errorHandler(callback));
   } else {
     apiAccessor.fetch(section, callback);
   }
 });
 
-app.get('/analytics', function(request, response) {
+app.get('/analytics', (request, response) => {
   if (request.isCurl) {
     response.status(201).send(
         DataFormatter.formatSections(ApiAccessor.SECTIONS, false));
@@ -156,13 +156,13 @@ app.get('/analytics', function(request, response) {
   }
 });
 
-app.post('/analytics', function(request, response) {
-  analytics.getAnalytics(function(error, data) {
+app.post('/analytics', (request, response) => {
+  analytics.getAnalytics((error, data) => {
     response.status(201).send(data);
   });
 });
 
-app.use(function(request, response) {
+app.use((request, response) => {
   if (request.isCurl) {
     response.status(400).send(
       DataFormatter.formatSections(ApiAccessor.SECTIONS, true));
@@ -176,10 +176,12 @@ app.use(function(request, response) {
 });
 
 // Starts the server.
-server.listen(PORT, function() {
+server.listen(PORT, () => {
   console.log('STARTING SERVER ON PORT ' + PORT);
-  if (DEV_MODE) {
-    console.log('DEV_MODE ENABLED!');
+  if (PROD_MODE) {
+    console.log('RUNNING AS PROD!');
+  } else {
+    console.log('RUNNING AS DEV!');
   }
   if (!process.env.NYTIMES_API_KEY) {
     throw new Error('No NYTimes API key specified.');
@@ -187,10 +189,10 @@ server.listen(PORT, function() {
   if (!process.env.URL_SHORTENER_API_KEY) {
     throw new Error('No URL shortener API key specified.');
   }
-  if (!DEV_MODE && !SENDGRID_API_KEY) {
-    throw new Error('No SendGrid API key specified! Use --dev mode?');
+  if (PROD_MODE && !SENDGRID_API_KEY) {
+    throw new Error('No SendGrid API key specified!');
   }
-  if (!DEV_MODE && !ALERT_EMAIL) {
-    throw new Error('No alert email specified! Use --dev mode?');
+  if (PROD_MODE && !ALERT_EMAIL) {
+    throw new Error('No alert email specified!');
   }
 });
