@@ -18,11 +18,11 @@ function Analytics(analyticsFile) {
 }
 
 /**
- * Milliseconds in a day
+ * Milliseconds in an hour.
  * @const
  * @type {number}
  */
-Analytics.CACHE_KEEP_TIME = 86400000;
+Analytics.CACHE_KEEP_TIME = 3600000;
 
 /**
  * Factory method for an Analytics object.
