@@ -49,20 +49,23 @@ Analytics.prototype.getAnalytics = function(callback) {
   if (this.cache.analytics && currentTime < this.cache.expires) {
     return callback(null, this.cache.analytics);
   }
+  var context = this;
   fs.readFile(this.analyticsFile, 'utf-8', (error, data) => {
     if (error) {
       return callback(error);
     }
     try {
-      data = data.trim().split('\n').map(entry => {
+      data = data.trim().split('\n').map(function(entry) {
         entry = JSON.parse(entry);
         entry.country = geoip.lookup(entry.ip).name;
         return entry;
       });
+      context.cache.analytics = data;
+      context.cache.expires = currentTime + Analytics.CACHE_KEEP_TIME;
+      return callback(null, data);
     } catch (error) {
       return callback(error);
     }
-    return callback(error, data);
   });
 };
 

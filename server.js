@@ -115,9 +115,6 @@ app.get('/:section?', (request, response, next) => {
   }
   var callback = (error, articles) => {
     if (error) {
-      if (DEV_MODE) {
-        console.error(error);
-      }
       if (request.isCurl) {
         response.status(500).send(
             'An error occurred. Please try again later. '.red +
