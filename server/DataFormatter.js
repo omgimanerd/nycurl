@@ -117,9 +117,9 @@ DataFormatter.formatSections = function(sections, warning) {
   }]);
   table.push([
     sections.join('\n').green,
-    'Set terminal width:\n'.cyan + 'w=WIDTH\n\n' +
-    'Set article #:\n'.cyan + 'i=INDEX\n\n' +
-    'Limit number of articles:\n'.cyan + 'n=NUMBER\n\n'
+    'Set output width:\n' + 'w='.blue + 'WIDTH\n\n'.green +
+    'Set article #:\n' + 'i='.blue + 'INDEX\n\n'.green +
+    'Limit number of articles:\n' + 'n='.blue + 'NUMBER\n\n'.green
   ]);
   table.push([{
     colSpan: 2,
