@@ -24,7 +24,14 @@ function ApiAccessor(nytimes_api_key, url_shortener_api_key) {
  * @const
  * @type {string}
  */
-ApiAccessor.BASE_URL = 'http://api.nytimes.com/svc/topstories/v2/';
+ApiAccessor.NYTIMES_URL = 'http://api.nytimes.com/svc/topstories/v2/';
+
+/**
+ * @const
+ * @type {string}
+ */
+ApiAccessor.URL_SHORTENER_API_URL =
+    'https://www.googleapis.com/urlshortener/v1/url';
 
 /**
  * @const
@@ -76,7 +83,7 @@ ApiAccessor.getNyTimesUrl = function(section) {
   if (!section) {
     section = 'home';
   }
-  return ApiAccessor.BASE_URL + section + '.json';
+  return ApiAccessor.NYTIMES_URL + section + '.json';
 };
 
 /**
@@ -98,7 +105,7 @@ ApiAccessor.isValidSection = function(section) {
  */
 ApiAccessor.prototype.shortenUrl = function(url, callback) {
   request({
-    url: 'https://www.googleapis.com/urlshortener/v1/url',
+    url: ApiAccessor.URL_SHORTENER_API_URL,
     method: 'POST',
     headers: {
       // The Referer field is necessary because of the referrer limitation set
@@ -121,36 +128,6 @@ ApiAccessor.prototype.shortenUrl = function(url, callback) {
 };
 
 /**
- * This method fetches article data from the NY Times and passes it into
- * a callback. It operates under the assumption that the section being passed
- * to it is a valid section to query and that the isValidSection() check has
- * passed. Any errors will be passed to the callback.
- * @param {string} section The NY Times section to query.
- * @param {function()} callback The callback function to which the articles
- *   are passed, along with any errors.
- */
-ApiAccessor.prototype.fetchArticles = function(section, callback) {
-  var context = this;
-  async.retry(10, function(innerCallback, results) {
-    request({
-      url: ApiAccessor.getNyTimesUrl(section),
-      qs: { 'api-key': context.nytimes_api_key },
-      json: true
-    }, function(error, response, body) {
-      if (error) {
-        return innerCallback(error);
-      } else if (response.statusCode === 403) {
-        return innerCallback('NYTimes API key error. Authorization failed.');
-      } else if (!body || !body.results || response.statusCode !== 200) {
-        return innerCallback('No results from NYTimes API section ' + section);
-      } else {
-        return innerCallback(null, body.results);
-      }
-    });
-  }, callback);
-};
-
-/**
  * This method fetches article data from the NY Times and and passes it into a
  * callback. It operates under the assumption that the section being passed to
  * it is a valid section to query and that the isValidSection() check has
@@ -160,7 +137,7 @@ ApiAccessor.prototype.fetchArticles = function(section, callback) {
  *   passed, along with any errors.
  * @return {?function()}
  */
-ApiAccessor.prototype.fetch = function(section, callback) {
+ApiAccessor.prototype.fetchArticles = function(section, callback) {
   /**
    * We first check if the section query has been cached within the last 10
    * minutes. If it has, then we return the cached data. If not, we then
@@ -185,9 +162,26 @@ ApiAccessor.prototype.fetch = function(section, callback) {
       /**
        * This first asynchronous function sends a request to the New York
        * Times API for the top stories, which we pass to the callback to
-       * the next asynchronous function call.
+       * the next asynchronous function call. It operates under the assumption
+       * that the section being passed to it is a valid section to query and
+       * that the isValidSection() check has passed. Any errors will be passed
+       * to the callback.
        */
-      context.fetchArticles(section, innerCallback);
+      request({
+        url: ApiAccessor.getNyTimesUrl(section),
+        qs: { 'api-key': context.nytimes_api_key },
+        json: true
+      }, function(error, response, body) {
+        if (error) {
+          innerCallback(error);
+        } else if (response.statusCode === 403) {
+          innerCallback('NYTimes API key error. Authorization failed.');
+        } else if (!body || !body.results || response.statusCode !== 200) {
+          innerCallback('No results from NYTimes API section ' + section);
+        } else {
+          innerCallback(null, body.results);
+        }
+      });
     }, function(results, innerCallback) {
       /**
        * This inner asynchronous function iterates through

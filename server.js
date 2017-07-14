@@ -138,9 +138,9 @@ app.get('/:section?', (request, response, next) => {
     }
   };
   if (PROD_MODE) {
-    apiAccessor.fetch(section, alert.errorHandler(callback));
+    apiAccessor.fetchArticles(section, alert.errorHandler(callback));
   } else {
-    apiAccessor.fetch(section, callback);
+    apiAccessor.fetchArticles(section, callback);
   }
 });
 
