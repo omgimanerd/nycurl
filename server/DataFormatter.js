@@ -48,24 +48,19 @@ DataFormatter.WARNING = 'Warning: Using too small of a width will cause ' +
 DataFormatter.INVALID_SECTION = '\nYou queried an invalid section!\n'.bold.red;
 
 /**
- * @const
- * @type {string}
+ * This method returns the table footer that is appended to every output Table.
+ * @return {Array<Object>}
  */
-DataFormatter.TWITTER_TEXT = 'Follow '.green + '@omgimanerd '.blue +
-    'on Twitter and GitHub.\n'.green;
-
-/**
- * @const
- * @type {string}
- */
-DataFormatter.GITHUB_TEXT = 'Open source contributions are welcome!\n'.green;
-
-/**
- * @const
- * @type {string}
- */
-DataFormatter.GITHUB_LINK =
-    'https://github.com/omgimanerd/nycurl'.underline.blue;
+DataFormatter.getTableFooter = function() {
+  return [{
+    colSpan: 2,
+    content: 'Follow '.green + '@omgimanerd '.blue +
+        'on Twitter and GitHub.\n'.green +
+        'Open source contributions are welcome!\n'.green +
+        'https://github.com/omgimanerd/nycurl'.underline.blue,
+    hAlign: 'center'
+  }];
+};
 
 /**
  * This method takes a string of text and separates it into lines of text
@@ -99,7 +94,7 @@ DataFormatter.formatTextWrap = function(text, maxLineLength) {
  *   warning.
  * @return {string}
  */
-DataFormatter.formatSections = function(sections, warning) {
+DataFormatter.formatHelp = function(sections, warning) {
   var table = new Table();
   if (warning) {
     table.push([{
@@ -128,13 +123,7 @@ DataFormatter.formatSections = function(sections, warning) {
         'curl nycurl.sytes.net/world?w=95\n' +
         'curl nycurl.sytes.net/food?w=95\\&n=10'
   }])
-  table.push([{
-    colSpan: 2,
-    content: DataFormatter.TWITTER_TEXT +
-        DataFormatter.GITHUB_TEXT +
-        DataFormatter.GITHUB_LINK,
-    hAlign: 'center'
-  }]);
+  table.push(DataFormatter.getTableFooter());
   return table.toString() + '\n';
 };
 
@@ -208,13 +197,7 @@ DataFormatter.formatArticles = function(articles, options) {
       [title, abstract, url].join('\n')
     ]);
   }
-  table.push([{
-    colSpan: 3,
-    content: DataFormatter.TWITTER_TEXT +
-        DataFormatter.GITHUB_TEXT +
-        DataFormatter.GITHUB_LINK,
-    hAlign: 'center'
-  }]);
+  table.push(DataFormatter.getTableFooter());
   if (maxWidth < DataFormatter.WIDTH_WARNING_THRESHOLD) {
     table.push([{
       colSpan: 3,

@@ -98,9 +98,10 @@ app.use((request, response, next) => {
 
 app.get('/help', (request, response) => {
   if (request.isCurl) {
-    response.send(DataFormatter.formatSections(ApiAccessor.SECTIONS, false));
+    response.status(201).send(
+        DataFormatter.formatHelp(ApiAccessor.SECTIONS, false));
   } else {
-    response.render('index', {
+    response.status(201).render('index', {
       header: 'Valid sections to query:',
       listSections: true,
       sections: ApiAccessor.SECTIONS
@@ -146,8 +147,8 @@ app.get('/:section?', (request, response, next) => {
 
 app.get('/analytics', (request, response) => {
   if (request.isCurl) {
-    response.status(201).send(
-        DataFormatter.formatSections(ApiAccessor.SECTIONS, false));
+    response.status(400).send(
+        DataFormatter.formatHelp(ApiAccessor.SECTIONS, false));
   } else {
     response.status(201).render('analytics');
   }
@@ -162,7 +163,7 @@ app.post('/analytics', (request, response) => {
 app.use((request, response) => {
   if (request.isCurl) {
     response.status(400).send(
-      DataFormatter.formatSections(ApiAccessor.SECTIONS, true));
+      DataFormatter.formatHelp(ApiAccessor.SECTIONS, true));
   } else {
     response.status(400).render('index', {
       header: 'Invalid query! Valid sections to query:',
