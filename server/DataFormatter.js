@@ -1,59 +1,28 @@
 /**
- * @fileoverview This is a class of static methods which will format the
+ * @fileoverview This is a module containing methods which will format the
  * data fetched from the NY Times API into a nice looking table.
- * @author alvin.lin.dev@gmail.com (Alvin Lin)
+ * @author alvin@omgimanerd.tech (Alvin Lin)
  */
 
 const colors = require('colors');
 const Table = require('cli-table2');
 
-/**
- * Enpty constructor for a DataFormatter class.
- * @constructor
- */
-function DataFormatter() {
-  throw new Error('DataFormatter should not be instantiated!');
-}
-
-/**
- * @const
- * @type {number}
- */
-DataFormatter.DEFAULT_DISPLAY_WIDTH = 72;
-
-/**
- * @const
- * @type {number}
- */
-DataFormatter.WIDTH_WARNING_THRESHOLD = 45;
-
-/**
- * @const
- * @type {string}
- */
-DataFormatter.HELP = '\nTo find a list of sections to query, use:\n'.red +
+const DEFAULT_DISPLAY_WIDTH = 72;
+const WIDTH_WARNING_THRESHOLD = 45;
+const HELP = '\nTo find a list of sections to query, use:\n'.red +
     'curl nycurl.sytes.net/help\n'.red;
-
-/**
- * @const
- * @type {string}
- */
-DataFormatter.WARNING = 'Warning: Using too small of a width will cause ' +
+const WARNING = 'Warning: Using too small of a width will cause ' +
     'unpredictable behavior!';
+const INVALID_SECTION = '\nYou queried an invalid section!\n'.bold.red;
 
 /**
- * @const
- * @type {string}
- */
-DataFormatter.INVALID_SECTION = '\nYou queried an invalid section!\n'.bold.red;
-
-/**
- * This method returns the table footer that is appended to every output Table.
+ * This method returns the table footer that is appended to every output
+ * Table.
  * @return {Array<Object>}
  */
-DataFormatter.getTableFooter = function() {
+const getTableFooter = (colSpan) => {
   return [{
-    colSpan: 2,
+    colSpan: colSpan,
     content: 'Follow '.green + '@omgimanerd '.blue +
         'on Twitter and GitHub.\n'.green +
         'Open source contributions are welcome!\n'.green +
@@ -69,7 +38,7 @@ DataFormatter.getTableFooter = function() {
  * @param {number} maxLineLength The maximum length of each line.
  * @return {string}
  */
-DataFormatter.formatTextWrap = function(text, maxLineLength) {
+const formatTextWrap = (text, maxLineLength) => {
   var words = text.split(' ');
   var lineLength = 0;
   var output = '';
@@ -94,12 +63,12 @@ DataFormatter.formatTextWrap = function(text, maxLineLength) {
  *   warning.
  * @return {string}
  */
-DataFormatter.formatHelp = function(sections, warning) {
+const formatHelp = (sections, warning) => {
   var table = new Table();
   if (warning) {
     table.push([{
       colSpan: 2,
-      content: DataFormatter.INVALID_SECTION,
+      content: INVALID_SECTION,
       hAlign: 'center'
     }]);
   }
@@ -123,7 +92,7 @@ DataFormatter.formatHelp = function(sections, warning) {
         'curl nycurl.sytes.net/world?w=95\n' +
         'curl nycurl.sytes.net/food?w=95\\&n=10'
   }])
-  table.push(DataFormatter.getTableFooter());
+  table.push(getTableFooter(2));
   return table.toString() + '\n';
 };
 
@@ -141,10 +110,10 @@ DataFormatter.formatHelp = function(sections, warning) {
  *   - width (width, defaults to DEFAULT_DISPLAY_WIDTH)
  * @return {string}
  */
-DataFormatter.formatArticles = function(articles, options) {
+const formatArticles = (articles, options) => {
   var maxWidth = parseInt(options['w'] || options['width']);
   if (isNaN(maxWidth) || maxWidth <= 0) {
-    maxWidth = DataFormatter.DEFAULT_DISPLAY_WIDTH;
+    maxWidth = DEFAULT_DISPLAY_WIDTH;
   }
   var index = parseInt(options['i'] || options['index']);
   if (isNaN(index) || index < 0) {
@@ -177,7 +146,7 @@ DataFormatter.formatArticles = function(articles, options) {
   });
   table.push([{
     colSpan: 3,
-    content: DataFormatter.HELP,
+    content: HELP,
     hAlign: 'center'
   }], ['#'.red, 'Section'.red, 'Details'.red]);
   for (var article of articles) {
@@ -186,22 +155,22 @@ DataFormatter.formatArticles = function(articles, options) {
      * We subtract 2 when calculating the space formatting for the text to
      * account for the padding at the edges of the table.
      */
-    var title = DataFormatter.formatTextWrap(
+    var title = formatTextWrap(
         article.title, detailsWidth - 2).bold.cyan;
-    var abstract = DataFormatter.formatTextWrap(
+    var abstract = formatTextWrap(
         article.abstract, detailsWidth - 2);
-    var url = new String(article.url).underline.green;
+    var url = new String(article.short_url).underline.green;
     table.push([
       (index++).toString().blue,
       section,
       [title, abstract, url].join('\n')
     ]);
   }
-  table.push(DataFormatter.getTableFooter());
-  if (maxWidth < DataFormatter.WIDTH_WARNING_THRESHOLD) {
+  table.push(getTableFooter(3));
+  if (maxWidth < WIDTH_WARNING_THRESHOLD) {
     table.push([{
       colSpan: 3,
-      content: DataFormatter.formatTextWrap(DataFormatter.WARNING,
+      content: formatTextWrap(WARNING,
           maxWidth - 4).red,
       hAlign: 'center'
     }]);
@@ -209,8 +178,7 @@ DataFormatter.formatArticles = function(articles, options) {
   return table.toString() + '\n';
 };
 
-/**
- * This line is needed on the server side since this is loaded as a module
- * into the node server.
- */
-module.exports = DataFormatter;
+module.exports = exports = {
+  formatHelp: formatHelp,
+  formatArticles: formatArticles
+};
