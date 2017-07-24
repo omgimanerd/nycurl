@@ -20,7 +20,11 @@ const errorFile = path.join(__dirname, 'logs/error.log');
 const Analytics = require('./server/Analytics');
 const ApiAccessor = require('./server/ApiAccessor');
 const DataFormatter = require('./server/DataFormatter')
-const loggers = require('./server/loggers')(analyticsFile, errorFile);
+const loggers = require('./server/loggers')({
+  PROD_MODE: PROD_MODE,
+  analyticsFile: analyticsFile,
+  errorFile: errorFile
+});
 
 const logError = loggers.errorLogger.error;
 
@@ -39,9 +43,7 @@ app.use('/robots.txt', express.static(__dirname + '/robots.txt'));
 app.use(loggers.devLogger);
 
 // Write analytics-worthy requests to the analytics log file.
-if (PROD_MODE) {
-  app.use(loggers.analyticsLogger);
-}
+app.use(loggers.analyticsLogger);
 
 // If the request is a curl request, we it as a param in the request object.
 app.use((request, response, next) => {
@@ -93,7 +95,6 @@ app.use((request, response) => {
       DataFormatter.formatHelp(ApiAccessor.SECTIONS, true));
 });
 
-// Error output
 app.use((error, request, response, next) => {
   logError(error);
   response.status(500).send(DataFormatter.ERROR);

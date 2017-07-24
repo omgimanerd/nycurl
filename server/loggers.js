@@ -3,9 +3,16 @@
  * @author alvin@omgimanerd.tech (Alvin Lin)
  */
 
-
 const expressWinston = require('express-winston');
 const winston = require('winston');
+const winstonMail = require('winston-mail');
+
+const ALERT_EMAIL = process.env.ALERT_EMAIL;
+const USERNAME = process.env.USERNAME;
+const PASSWORD = process.env.PASSWORD;
+if (!USERNAME || !PASSWORD || !ALERT_EMAIL) {
+  throw new Error('Production configuration not provided!');
+}
 
 const dynamicMetaFunction = (request, response) => {
   return {
@@ -13,7 +20,32 @@ const dynamicMetaFunction = (request, response) => {
   };
 };
 
-module.exports = exports = (analyticsFile, errorFile) => {
+module.exports = exports = (options) => {
+  const PROD_MODE = options.PROD_MODE;
+  const analyticsFile = options.analyticsFile;
+  const errorFile = options.errorFile;
+
+  const errorTransports = [
+    new winston.transports.Console({
+      prettyPrint: true,
+      timestamp: true
+    }),
+    new winston.transports.File({
+      filename: errorFile,
+      timestamp: true
+    })
+  ];
+  if (PROD_MODE) {
+    errorTransports.push(new winston.transports.Mail({
+      to: ALERT_EMAIL,
+      host: 'smtp.gmail.com',
+      username: USERNAME,
+      password: PASSWORD,
+      subject: 'NYCURL ERROR',
+      ssl: true
+    }));
+  }
+
   return {
     analyticsLogger: expressWinston.logger({
       transports: [
@@ -38,16 +70,7 @@ module.exports = exports = (analyticsFile, errorFile) => {
       dynamicMeta: dynamicMetaFunction
     }),
     errorLogger: new winston.Logger({
-      transports: [
-        new winston.transports.Console({
-          prettyPrint: true,
-          timestamp: true
-        }),
-        new winston.transports.File({
-          filename: errorFile,
-          timestamp: true
-        })
-      ]
+      transports: errorTransports
     })
   };
 };
