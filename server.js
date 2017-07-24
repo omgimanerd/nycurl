@@ -20,12 +20,12 @@ const errorFile = path.join(__dirname, 'logs/error.log');
 const Analytics = require('./server/Analytics');
 const ApiAccessor = require('./server/ApiAccessor');
 const DataFormatter = require('./server/DataFormatter')
+
 const loggers = require('./server/loggers')({
   PROD_MODE: PROD_MODE,
   analyticsFile: analyticsFile,
   errorFile: errorFile
 });
-
 const logError = loggers.errorLogger.error;
 
 // Server initialization
