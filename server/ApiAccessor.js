@@ -49,6 +49,7 @@ const fetchArticles = function(section) {
    * minutes. If it has, then we return the cached data. If not, we then
    * fetch new data from the New York Times API.
    */
+
   const currentTime = Date.now();
   if (cache[section] && currentTime < cache[section].expires) {
     return Promise.resolve(cache[section].results);

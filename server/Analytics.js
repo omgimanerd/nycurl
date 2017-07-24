@@ -4,7 +4,7 @@
  * @author alvin@omgimanerd.tech (Alvin Lin)
  */
 
-const fs = require('fs');
+const fs = require('fs-extra');
 const geoip = require('geoip-native');
 
 const CACHE_KEEP_TIME = 3600000;
@@ -25,15 +25,16 @@ const getAnalytics = file => {
   if (entry && currentTime < entry.expires) {
     return Promise.resolve(entry.analytics);
   }
-  return fs.readFile(path, 'utf8').then(data => {
+  return fs.readFile(file, 'utf8').then(data => {
     data = data.trim().split('\n').map(function(entry) {
       entry = JSON.parse(entry);
       entry.country = geoip.lookup(entry.ip).name;
       return entry;
     });
+    cache[file] = {};
     cache[file].analytics = data;
-    cache[file].expires = currentTime + Analytics.CACHE_KEEP_TIME;
-    return data;
+    cache[file].expires = currentTime + CACHE_KEEP_TIME;
+    return Promise.resolve(data);
   });
 };
 

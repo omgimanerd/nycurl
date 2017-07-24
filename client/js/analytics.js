@@ -45,7 +45,7 @@ const getTrafficData = data => {
   const hitsPerDay = new Map();
   const curlPerDay = new Map();
   for (const entry of data) {
-    const day = moment(entry.date).startOf('day').toString();
+    const day = moment(entry.timestamp).startOf('day').toString();
     hitsPerDay.set(day, (hitsPerDay.get(day) || 0) + 1);
     if ((entry.userAgent || '').includes('curl')) {
       curlPerDay.set(day, (curlPerDay.get(day) || 0) + 1);
@@ -67,7 +67,7 @@ const getTrafficData = data => {
 const getResponseTimeData = data => {
   const timesByDay = [];
   for (var entry of data) {
-    const day = moment(entry.date).startOf('day');
+    const day = moment(entry.timestamp).startOf('day');
     if (timesByDay[day]) {
       timesByDay[day].push(entry.responseTime || 0);
     } else {
@@ -91,7 +91,7 @@ const getResponseTimeData = data => {
 const getSectionFrequencyData = data => {
   const frequencies = new Map();
   for (const entry of data) {
-    const url = /\/([a-z]+)|$/g.exec(entry.url || '')[1] || 'home';
+    const url = /\/([a-z]+)|$/g.exec(entry.req.url || '')[1] || 'home';
     frequencies.set(url, (frequencies.get(url) || 0) + 1);
   }
   const sorted10 = new Map(
@@ -205,7 +205,7 @@ $(document).ready(() => {
     dateSlider.noUiSlider.on('set', () => {
       const sliderRange = dateSlider.noUiSlider.get().map(d => moment.unix(d));
       const filteredData = data.filter(entry => {
-        return moment(entry.date).isBetween(sliderRange[0], sliderRange[1]);
+        return moment(entry.timestamp).isBetween(sliderRange[0], sliderRange[1]);
       });
       if (filteredData.length == 0) {
         window.alert('This time segment has no data!');

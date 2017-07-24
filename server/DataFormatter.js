@@ -11,6 +11,7 @@ const DEFAULT_DISPLAY_WIDTH = 72;
 const WIDTH_WARNING_THRESHOLD = 45;
 const HELP = '\nTo find a list of sections to query, use:\n'.red +
     'curl nycurl.sytes.net/help\n'.red;
+const ERROR = 'An error occurred! Please try again later.\n'.red;
 const WARNING = 'Warning: Using too small of a width will cause ' +
     'unpredictable behavior!';
 const INVALID_SECTION = '\nYou queried an invalid section!\n'.bold.red;
@@ -179,6 +180,7 @@ const formatArticles = (articles, options) => {
 };
 
 module.exports = exports = {
+  ERROR: ERROR,
   formatHelp: formatHelp,
   formatArticles: formatArticles
 };
