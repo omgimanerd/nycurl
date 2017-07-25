@@ -7,13 +7,42 @@
 const colors = require('colors');
 const Table = require('cli-table2');
 
+/**
+ * The default number of characters for formatting the table width.
+ * @type {number}
+ */
 const DEFAULT_DISPLAY_WIDTH = 72;
+
+/**
+ * If the user specifies a width less than this, a warning will be displayed.
+ * @type {number}
+ */
 const WIDTH_WARNING_THRESHOLD = 45;
+
+/**
+ * Default help text.
+ * @type {string}
+ */
 const HELP = '\nTo find a list of sections to query, use:\n'.red +
     'curl nycurl.sytes.net/help\n'.red;
+
+/**
+ * Default error text.
+ * @type {string}
+ */
 const ERROR = 'An error occurred! Please try again later.\n'.red;
+
+/**
+ * Default warning text.
+ * @type {string}
+ */
 const WARNING = 'Warning: Using too small of a width will cause ' +
     'unpredictable behavior!';
+
+/**
+ * Error text when querying an invalid section.
+ * @type {string}
+ */
 const INVALID_SECTION = '\nYou queried an invalid section!\n'.bold.red;
 
 /**

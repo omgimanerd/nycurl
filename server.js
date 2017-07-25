@@ -17,9 +17,9 @@ const path = require('path');
 const analyticsFile = path.join(__dirname, 'logs/analytics.log');
 const errorFile = path.join(__dirname, 'logs/error.log');
 
-const Analytics = require('./server/Analytics');
-const ApiAccessor = require('./server/ApiAccessor');
-const DataFormatter = require('./server/DataFormatter')
+const analytics = require('./server/analytics');
+const api = require('./server/api');
+const formatter = require('./server/formatter');
 
 const loggers = require('./server/loggers')({
   PROD_MODE: PROD_MODE,
@@ -60,7 +60,7 @@ app.get('/analytics', (request, response, next) => {
 });
 
 app.post('/analytics', (request, response) => {
-  Analytics.getAnalytics(analyticsFile).then(data => {
+  analytics.get(analyticsFile).then(data => {
     response.status(201).send(data);
   }).catch(error => {
     logError(error);
@@ -75,29 +75,28 @@ app.get('/:section?', (request, response, next) => {
     return;
   }
   if (section === 'help') {
-    response.send(DataFormatter.formatHelp(ApiAccessor.SECTIONS, false));
+    response.send(formatter.formatHelp(api.SECTIONS, false));
     return;
   }
-  if (!ApiAccessor.isValidSection(section)) {
+  if (!api.isValidSection(section)) {
     next();
     return;
   }
-  ApiAccessor.fetchArticles(section).then(articles => {
-    response.send(DataFormatter.formatArticles(articles, request.query));
+  api.fetchArticles(section).then(articles => {
+    response.send(formatter.formatArticles(articles, request.query));
   }).catch(error => {
     logError(error);
-    response.status(500).send(DataFormatter.ERROR);
+    response.status(500).send(formatter.ERROR);
   });
 });
 
 app.use((request, response) => {
-  response.status(400).send(
-      DataFormatter.formatHelp(ApiAccessor.SECTIONS, true));
+  response.status(400).send(formatter.formatHelp(api.SECTIONS, true));
 });
 
 app.use((error, request, response, next) => {
   logError(error);
-  response.status(500).send(DataFormatter.ERROR);
+  response.status(500).send(formatter.ERROR);
 });
 
 // Starts the server.

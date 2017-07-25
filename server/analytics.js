@@ -15,7 +15,7 @@ const cache = {};
  * Fetches analytics on recent site traffic and returns a Promise.
  * @return {Promise}
  */
-const getAnalytics = file => {
+const get = file => {
   /**
    * First check if we have analytics cached. If not, then we should fetch it
    * again.
@@ -39,5 +39,5 @@ const getAnalytics = file => {
 };
 
 module.exports = exports = {
-  getAnalytics: getAnalytics
+  get: get
 };
