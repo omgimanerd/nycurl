@@ -4,21 +4,30 @@
  * @author alvin.lin.dev@gmail.com (Alvin Lin)
  */
 
-const async = require('async');
 const request = require('request-promise');
 
 const NYTIMES_API_KEY = process.env.NYTIMES_API_KEY;
-if (!NYTIMES_API_KEY || typeof(NYTIMES_API_KEY) !== 'string') {
+if (!NYTIMES_API_KEY) {
   throw new Error('No NYTimes API key specified. Make sure you have \
       NYTIMES_API_KEY in your environment variables.');
 }
 
+/**
+ * Base URL for the NYTimes API.
+ * @type {string}
+ */
 const NYTIMES_URL = 'http://api.nytimes.com/svc/topstories/v2';
 
-const SELECTED_FIELDS = ['section', 'title', 'abstract', 'url'];
-
+/**
+ * Milliseconds in 10 minutes, the duration which results will be cached.
+ * @type {number}
+ */
 const CACHE_KEEP_TIME = 600000;
 
+/**
+ * The list of available sections one can query from.
+ * @type {Array<string>}
+ */
 const SECTIONS = ['home', 'opinion', 'world', 'national', 'politics',
     'upshot', 'nyregion', 'business', 'technology', 'science', 'health',
     'sports', 'arts', 'books', 'movies', 'theater', 'sundayreview', 'fashion',
