@@ -35,6 +35,11 @@ const get = file => {
     cache[file].analytics = data;
     cache[file].expires = currentTime + CACHE_KEEP_TIME;
     return Promise.resolve(data);
+  }).catch(error => {
+    return Promise.reject({
+      message: 'Analytics fetching failure',
+      error: error
+    });
   });
 };
 

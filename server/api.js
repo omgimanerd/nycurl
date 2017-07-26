@@ -81,6 +81,11 @@ const fetchArticles = function(section) {
       expires: currentTime + CACHE_KEEP_TIME
     };
     return Promise.resolve(results);
+  }).catch(error => {
+    return Promise.reject({
+      message: 'NYTimes API Failure',
+      error: error
+    });
   });
 };
 
