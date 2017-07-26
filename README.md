@@ -5,6 +5,55 @@ to each article is included if the user wants to read the full article.
 To query news from other sources on the web, check out
 [getnews.tech](https://github.com/omgimanerd/getnews.tech).
 
+## Example Output
+```
+$ curl nycurl.sytes.net?i=5
+┌──────────────────────────────────────────────────────────────────────┐
+│                                                                      │
+│              To find a list of sections to query, use:               │
+│                      curl nycurl.sytes.net/help                      │
+│                                                                      │
+├───┬──────────────┬───────────────────────────────────────────────────┤
+│ # │ Section      │ Details                                           │
+├───┼──────────────┼───────────────────────────────────────────────────┤
+│ 0 │ Arts         │ Canada Debates Whether Gift of Leibovitz Photos   │
+│   │              │ Is Also a Tax Dodge                               │
+│   │              │ Four years after the donation of 2,070 photos     │
+│   │              │ created by Annie Leibovitz to a Nova Scotia       │
+│   │              │ museum, a government panel is balking at its $20  │
+│   │              │ million valuation.                                │
+│   │              │ https://nyti.ms/2tH1g2N                           │
+├───┼──────────────┼───────────────────────────────────────────────────┤
+│ 1 │ Books        │ What Happens When Liberty Fails to Deliver        │
+│   │              │ In “The Retreat of Western Liberalism,” Edward    │
+│   │              │ Luce argues that the tradition of liberty is      │
+│   │              │ under mortal threat.                              │
+│   │              │ https://nyti.ms/2tFDJ2g                           │
+├───┼──────────────┼───────────────────────────────────────────────────┤
+│ 2 │ Briefing     │ Senate, John McCain, Jeff Sessions: Your Tuesday  │
+│   │              │ Evening Briefing                                  │
+│   │              │ Here’s what you need to know at the end of the    │
+│   │              │ day.                                              │
+│   │              │ https://nyti.ms/2tHzEdW                           │
+├───┼──────────────┼───────────────────────────────────────────────────┤
+│ 3 │ Briefing     │ Donald Trump, Republican Party, Russia: Your      │
+│   │              │ Wednesday Briefing                                │
+│   │              │ Here’s what you need to know to start your day.   │
+│   │              │ https://nyti.ms/2tXFUtp                           │
+├───┼──────────────┼───────────────────────────────────────────────────┤
+│ 4 │ Business Day │ To Punish Putin, Economic Sanctions Are Unlikely  │
+│   │              │ to Do the Trick                                   │
+│   │              │ Using economic penalties to achieve diplomatic    │
+│   │              │ goals has a poor track record when the target is  │
+│   │              │ powerful and autocratic, and workarounds exist.   │
+│   │              │ https://nyti.ms/2tGwbwj                           │
+├───┴──────────────┴───────────────────────────────────────────────────┤
+│              Follow @omgimanerd on Twitter and GitHub.               │
+│                Open source contributions are welcome!                │
+│                 https://github.com/omgimanerd/nycurl                 │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
 ## Usage
 You can fetch the latest news simply by typing  
 ```bash
@@ -51,7 +100,7 @@ npm install # or yarn install
 webpack
 ```
 
-Run the server in development node:
+Run the server:
 ```
 node server.js
 ```
