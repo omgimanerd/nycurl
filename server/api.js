@@ -41,7 +41,7 @@ const cache = {};
  * @param {?string=} section The NY Times section to query.
  * @return {boolean}
  */
-const isValidSection = function(section) {
+const isValidSection = section => {
   return SECTIONS.indexOf(section) != -1;
 };
 
@@ -52,17 +52,17 @@ const isValidSection = function(section) {
  * @param {string} section The NY Times section to query.
  * @return {Promise}
  */
-const fetchArticles = function(section) {
+const fetchArticles = section => {
   /**
    * We first check if the section query has been cached within the last 10
    * minutes. If it has, then we return the cached data. If not, we then
    * fetch new data from the New York Times API.
    */
-
   const currentTime = Date.now();
   if (cache[section] && currentTime < cache[section].expires) {
     return Promise.resolve(cache[section].results);
   }
+
   /**
    * If the section being requested was not cached, then we need to fetch the
    * data from the New York Times. We will cache it before returning the
@@ -72,10 +72,13 @@ const fetchArticles = function(section) {
     uri: `${NYTIMES_URL}/${section}.json`,
     qs: { 'api-key': NYTIMES_API_KEY },
     json: true
-  }).then(body => {
-    var results = body.results.sort(function(a, b) {
+  }).then(data => {
+    const results = data.results.sort((a, b) => {
       return a.section.localeCompare(b.section);
     });
+    /**
+     * We cache the result and then return it in a resolved Promise.
+     */
     cache[section] = {
       results: results,
       expires: currentTime + CACHE_KEEP_TIME

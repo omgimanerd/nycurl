@@ -7,6 +7,10 @@
 const fs = require('fs-extra');
 const geoip = require('geoip-native');
 
+/**
+ * Milliseconds in an hour, the duration which analytics data will be cached.
+ * @type {number}
+ */
 const CACHE_KEEP_TIME = 3600000;
 
 const cache = {};
@@ -20,13 +24,13 @@ const get = file => {
    * First check if we have analytics cached. If not, then we should fetch it
    * again.
    */
-  var currentTime = Date.now();
-  var entry = cache[file];
+  const currentTime = Date.now();
+  const entry = cache[file];
   if (entry && currentTime < entry.expires) {
     return Promise.resolve(entry.analytics);
   }
   return fs.readFile(file, 'utf8').then(data => {
-    data = data.trim().split('\n').map(function(entry) {
+    data = data.trim().split('\n').map(entry => {
       entry = JSON.parse(entry);
       entry.country = geoip.lookup(entry.ip).name;
       return entry;

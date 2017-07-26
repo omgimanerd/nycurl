@@ -20,7 +20,6 @@ const errorFile = path.join(__dirname, 'logs/error.log');
 const analytics = require('./server/analytics');
 const api = require('./server/api');
 const formatter = require('./server/formatter');
-
 const loggers = require('./server/loggers')({
   PROD_MODE: PROD_MODE,
   analyticsFile: analyticsFile,
@@ -29,7 +28,7 @@ const loggers = require('./server/loggers')({
 const logError = loggers.errorLogger.error;
 
 // Server initialization
-var app = express();
+const app = express();
 
 app.set('port', PORT);
 app.set('view engine', 'pug');
@@ -69,11 +68,12 @@ app.post('/analytics', (request, response) => {
 });
 
 app.get('/:section?', (request, response, next) => {
-  const section = request.params.section || 'home';
   if (!request.isCurl) {
     response.status(301).redirect(GITHUB_PAGE);
     return;
   }
+
+  const section = request.params.section || 'home';
   if (section === 'help') {
     response.send(formatter.formatHelp(api.SECTIONS, false));
     return;
@@ -101,10 +101,9 @@ app.use((error, request, response, next) => {
 
 // Starts the server.
 http.Server(app).listen(PORT, () => {
-  console.log(`STARTING SERVER ON PORT ${PORT}`);
   if (PROD_MODE) {
-    console.log('RUNNING AS PROD!');
+    console.log('STARTING PRODUCTION SERVER ON PORT ' + PORT);
   } else {
-    console.log('RUNNING AS DEV!');
+    console.log('STARTING DEV SERVER ON PORT ' + PORT);
   }
 });

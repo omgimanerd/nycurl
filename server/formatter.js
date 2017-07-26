@@ -20,17 +20,17 @@ const DEFAULT_DISPLAY_WIDTH = 72;
 const WIDTH_WARNING_THRESHOLD = 45;
 
 /**
+* Default error text.
+* @type {string}
+*/
+const ERROR = 'An error occurred! Please try again later.\n'.red;
+
+/**
  * Default help text.
  * @type {string}
  */
-const HELP = '\nTo find a list of sections to query, use:\n'.red +
-    'curl nycurl.sytes.net/help\n'.red;
-
-/**
- * Default error text.
- * @type {string}
- */
-const ERROR = 'An error occurred! Please try again later.\n'.red;
+const HELP = '\nTo find a list of sections to query, use:\n' +
+    'curl nycurl.sytes.net/help\n';
 
 /**
  * Default warning text.
@@ -43,7 +43,7 @@ const WARNING = 'Warning: Using too small of a width will cause ' +
  * Error text when querying an invalid section.
  * @type {string}
  */
-const INVALID_SECTION = '\nYou queried an invalid section!\n'.bold.red;
+const INVALID_SECTION = '\nYou queried an invalid section!\n';
 
 /**
  * This method returns the table footer that is appended to every output
@@ -89,16 +89,16 @@ const formatTextWrap = (text, maxLineLength) => {
  * it into a table for display, appending help instructions and example usage
  * information to it.
  * @param {Array<string>} sections The sections to display.
- * @param {boolean} warning Whether or not to show the "invalid section"
+ * @param {boolean} invalidSection Whether or not to show the invalid section
  *   warning.
  * @return {string}
  */
-const formatHelp = (sections, warning) => {
+const formatHelp = (sections, invalidSection) => {
   var table = new Table();
-  if (warning) {
+  if (invalidSection) {
     table.push([{
       colSpan: 2,
-      content: INVALID_SECTION,
+      content: INVALID_SECTION.bold.red,
       hAlign: 'center'
     }]);
   }
@@ -132,12 +132,9 @@ const formatHelp = (sections, warning) => {
  * It assumes that the data has the fields outlined in the documentation
  * on the NY Times developer documentation.
  * http://developer.nytimes.com/docs/top_stories_api/
- * @param {Array<Object>} articles The list of articles returned by a query to
+ * @param {Array<Object>} articles A list of articles returned by a query to
  *   the NY Times API.
  * @param {?Object=} options A dictionary containing configuration options.
- *   Valid keys are:
- *   - w (width, defaults to DEFAULT_DISPLAY_WIDTH)
- *   - width (width, defaults to DEFAULT_DISPLAY_WIDTH)
  * @return {string}
  */
 const formatArticles = (articles, options) => {
@@ -154,42 +151,42 @@ const formatArticles = (articles, options) => {
     number = articles.length;
   }
 
-  articles = articles.slice(index, index + number);
+  articles = articles.splice(index, number);
   /**
    * We first calculate how wide the column containing the article numbers
    * will be, adding two to account for the cell padding.
    */
-  var maxNumbersWidth = (index + number).toString().length + 2;
+  const maxNumbersWidth = (index + number).toString().length + 2;
   /**
    * We then calculate the amount of space the section column will take up,
    * adding two to account for cell padding.
    */
-  var maxSectionsWidth = Math.max.apply(null, articles.map((article) =>
+  const maxSectionsWidth = Math.max(...articles.map((article) =>
       article.section.length).concat('Section'.length)) + 2;
-  /*
+  /**
    * The borders of the table take up 4 characters, so we allocate the rest of
    * the space to the details column.
    */
-  var detailsWidth = maxWidth - maxNumbersWidth - maxSectionsWidth - 4;
+  const detailsWidth = maxWidth - maxNumbersWidth - maxSectionsWidth - 4;
   var table = new Table({
     colWidths: [maxNumbersWidth, maxSectionsWidth, detailsWidth]
   });
   table.push([{
     colSpan: 3,
-    content: HELP,
+    content: HELP.red,
     hAlign: 'center'
   }], ['#'.red, 'Section'.red, 'Details'.red]);
   for (var article of articles) {
-    var section = new String(article.section).underline.cyan;
+    const section = new String(article.section).underline.cyan;
     /**
      * We subtract 2 when calculating the space formatting for the text to
      * account for the padding at the edges of the table.
      */
-    var title = formatTextWrap(
+    const title = formatTextWrap(
         article.title, detailsWidth - 2).bold.cyan;
-    var abstract = formatTextWrap(
+    const abstract = formatTextWrap(
         article.abstract, detailsWidth - 2);
-    var url = new String(article.short_url).underline.green;
+    const url = new String(article.short_url).underline.green;
     table.push([
       (index++).toString().blue,
       section,
