@@ -104,8 +104,8 @@ app.use((error, request, response, next) => {
 // Starts the server.
 http.Server(app).listen(PORT, () => {
   if (PROD_MODE) {
-    console.log('STARTING PRODUCTION SERVER ON PORT ' + PORT);
+    console.log(`STARTING PRODUCTION SERVER ON PORT ${PORT}`.green);
   } else {
-    console.log('STARTING DEV SERVER ON PORT ' + PORT);
+    console.log(`STARTING DEV SERVER ON PORT ${PORT}`.green);
   }
 });
