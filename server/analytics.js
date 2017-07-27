@@ -31,9 +31,8 @@ const get = file => {
   }
   return fs.readFile(file, 'utf8').then(data => {
     data = data.trim().split('\n').map(entry => {
-      entry = JSON.parse(entry);
-      entry.country = geoip.lookup(entry.ip).name;
-      return entry;
+      return JSON.parse(entry,
+          (key, value) => key === 'ip': geoip.lookup(value) : value);
     });
     cache[file] = {};
     cache[file].analytics = data;
