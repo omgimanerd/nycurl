@@ -75,7 +75,7 @@ app.get('/:section?', (request, response, next) => {
 
   const section = request.params.section || 'home';
   if (section === 'help') {
-    response.send(formatter.formatHelp(api.SECTIONS, false));
+    response.send(formatter.formatHelp(false));
     return;
   }
   if (!api.isValidSection(section)) {
@@ -91,7 +91,7 @@ app.get('/:section?', (request, response, next) => {
 });
 
 app.use((request, response) => {
-  response.status(400).send(formatter.formatHelp(api.SECTIONS, true));
+  response.status(400).send(formatter.formatHelp(true));
 });
 
 app.use((error, request, response, next) => {

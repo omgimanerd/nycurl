@@ -47,6 +47,4 @@ const get = file => {
   });
 };
 
-module.exports = exports = {
-  get: get
-};
+module.exports = exports = { get };

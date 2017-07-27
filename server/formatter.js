@@ -7,6 +7,8 @@
 const colors = require('colors');
 const Table = require('cli-table2');
 
+const api = require('./api');
+
 /**
  * The default number of characters for formatting the table width.
  * @type {number}
@@ -85,15 +87,13 @@ const formatTextWrap = (text, maxLineLength) => {
 };
 
 /**
- * This function takes the array of possible NY Times sections and formats
- * it into a table for display, appending help instructions and example usage
- * information to it.
- * @param {Array<string>} sections The sections to display.
+ * This function formats the array of possible NY Times sections into a table
+ * for display, appending help instructions and example usage information to it.
  * @param {boolean} invalidSection Whether or not to show the invalid section
  *   warning.
  * @return {string}
  */
-const formatHelp = (sections, invalidSection) => {
+const formatHelp = (invalidSection) => {
   var table = new Table();
   if (invalidSection) {
     table.push([{
@@ -110,7 +110,7 @@ const formatHelp = (sections, invalidSection) => {
     hAlign: 'center'
   }]);
   table.push([
-    sections.join('\n').green,
+    api.SECTIONS.join('\n').green,
     'Set output width:\n' + 'w='.blue + 'WIDTH\n\n'.green +
     'Set article #:\n' + 'i='.blue + 'INDEX\n\n'.green +
     'Limit number of articles:\n' + 'n='.blue + 'NUMBER\n\n'.green
@@ -205,8 +205,4 @@ const formatArticles = (articles, options) => {
   return table.toString() + '\n';
 };
 
-module.exports = exports = {
-  ERROR: ERROR,
-  formatHelp: formatHelp,
-  formatArticles: formatArticles
-};
+module.exports = exports = { ERROR, formatHelp, formatArticles };

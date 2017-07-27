@@ -83,17 +83,13 @@ const fetchArticles = section => {
       results: results,
       expires: currentTime + CACHE_KEEP_TIME
     };
-    return Promise.resolve(results);
+    return results;
   }).catch(error => {
-    return Promise.reject({
+    return Promise.reject(new Error({
       message: 'NYTimes API Failure',
       error: error
-    });
+    }));
   });
 };
 
-module.exports = exports = {
-  SECTIONS: SECTIONS,
-  isValidSection: isValidSection,
-  fetchArticles: fetchArticles
-};
+module.exports = exports = { SECTIONS, isValidSection, fetchArticles };
