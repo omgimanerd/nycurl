@@ -8,6 +8,7 @@ const colors = require('colors');
 const Table = require('cli-table2');
 
 const api = require('./api');
+const Strings = require('./Strings');
 
 /**
  * The default number of characters for formatting the table width.
@@ -20,32 +21,6 @@ const DEFAULT_DISPLAY_WIDTH = 72;
  * @type {number}
  */
 const WIDTH_WARNING_THRESHOLD = 45;
-
-/**
-* Default error text.
-* @type {string}
-*/
-const ERROR = 'An error occurred! Please try again later.\n'.red;
-
-/**
- * Default help text.
- * @type {string}
- */
-const HELP = '\nTo find a list of sections to query, use:\n' +
-    'curl nycurl.sytes.net/help\n';
-
-/**
- * Default warning text.
- * @type {string}
- */
-const WARNING = 'Warning: Using too small of a width will cause ' +
-    'unpredictable behavior!';
-
-/**
- * Error text when querying an invalid section.
- * @type {string}
- */
-const INVALID_SECTION = '\nYou queried an invalid section!\n';
 
 /**
  * This method returns the table footer that is appended to every output
@@ -98,7 +73,7 @@ const formatHelp = (invalidSection) => {
   if (invalidSection) {
     table.push([{
       colSpan: 2,
-      content: INVALID_SECTION.bold.red,
+      content: Strings.INVALID_SECTION.bold.red,
       hAlign: 'center'
     }]);
   }
@@ -173,7 +148,7 @@ const formatArticles = (articles, options) => {
   });
   table.push([{
     colSpan: 3,
-    content: HELP.red,
+    content: Strings.HELP.red,
     hAlign: 'center'
   }], ['#'.red, 'Section'.red, 'Details'.red]);
   for (var article of articles) {
@@ -197,12 +172,11 @@ const formatArticles = (articles, options) => {
   if (maxWidth < WIDTH_WARNING_THRESHOLD) {
     table.push([{
       colSpan: 3,
-      content: formatTextWrap(WARNING,
-          maxWidth - 4).red,
+      content: formatTextWrap(Strings.WARNING, maxWidth - 4).red,
       hAlign: 'center'
     }]);
   }
   return table.toString() + '\n';
 };
 
-module.exports = exports = { ERROR, formatHelp, formatArticles };
+module.exports = exports = { formatHelp, formatArticles };

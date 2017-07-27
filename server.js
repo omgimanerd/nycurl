@@ -25,6 +25,8 @@ const loggers = require('./server/loggers')({
   analyticsFile: analyticsFile,
   errorFile: errorFile
 });
+const Strings = require('./server/Strings');
+
 const logError = loggers.errorLogger.error;
 
 // Server initialization
@@ -86,7 +88,7 @@ app.get('/:section?', (request, response, next) => {
     response.send(formatter.formatArticles(articles, request.query));
   }).catch(error => {
     logError(error);
-    response.status(500).send(formatter.ERROR);
+    response.status(500).send(Strings.ERROR);
   });
 });
 
@@ -96,7 +98,7 @@ app.use((request, response) => {
 
 app.use((error, request, response, next) => {
   logError(error);
-  response.status(500).send(formatter.ERROR);
+  response.status(500).send(Strings.ERROR);
 });
 
 // Starts the server.
