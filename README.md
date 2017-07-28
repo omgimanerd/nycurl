@@ -85,7 +85,7 @@ you must use `\&` to escape the ampersand character.
 
 ## Contributing
 Fork this repository and send me a pull request with any suggestions and
-changes. Use two-space indents and camel-cased variables.
+changes. Use [StandardJS](https://standardjs.com/) to format your code.
 
 You will need to acquire a Top Stories API Key from the
 [New York Times](http://developer.nytimes.com). Add it to your .bashrc
