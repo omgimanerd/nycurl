@@ -31,8 +31,9 @@ const get = file => {
   }
   return fs.readFile(file, 'utf8').then(data => {
     data = data.trim().split('\n').map(entry => {
-      return JSON.parse(
-          entry, (key, value) => key === 'ip' ? geoip.lookup(value) : value)
+      entry = JSON.parse(entry)
+      entry.country = geoip.lookup(entry.ip).name
+      return entry
     })
     cache[file] = {}
     cache[file].analytics = data
@@ -41,7 +42,7 @@ const get = file => {
   }).catch(error => {
     return Promise.reject({
       message: 'Analytics fetching failure',
-      error: error
+      error: error.toString()
     })
   })
 }
