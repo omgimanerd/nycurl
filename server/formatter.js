@@ -49,7 +49,8 @@ const WARNING = 'Warning: Using too small of a width will cause unpredictable \
 const getTableFooter = (colSpan) => {
   return [{
     colSpan: colSpan,
-    content: 'Follow '.green + '@omgimanerd '.blue +
+    content: 'Powered by the New York Times API.\n'.green +
+        'Follow '.green + '@omgimanerd '.blue +
         'on Twitter and GitHub.\n'.green +
         'Open source contributions are welcome!\n'.green +
         'https://github.com/omgimanerd/nycurl'.underline.blue,
@@ -104,7 +105,7 @@ const formatHelp = (invalidSection) => {
     hAlign: 'center'
   }])
   table.push([
-    api.SECTIONS.join('\n').green,
+    api.SECTIONS.sort().join('\n').green,
     'Set output width:\n' + 'w='.blue + 'WIDTH\n\n'.green +
     'Set article #:\n' + 'i='.blue + 'INDEX\n\n'.green +
     'Limit number of articles:\n' + 'n='.blue + 'NUMBER\n\n'.green
