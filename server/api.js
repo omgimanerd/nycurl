@@ -4,7 +4,10 @@
  * @author alvin.lin.dev@gmail.com (Alvin Lin)
  */
 
+const Promise = require('bluebird')
 const request = require('request-promise')
+
+const NycurlError = require('./NycurlError')
 
 const NYTIMES_API_KEY = process.env.NYTIMES_API_KEY
 if (!NYTIMES_API_KEY) {
@@ -54,7 +57,7 @@ const cache = {}
  * @return {boolean}
  */
 const isValidSection = section => {
-  return SECTIONS.indexOf(section) != -1
+  return SECTIONS.includes(section)
 }
 
 /**
@@ -63,7 +66,7 @@ const isValidSection = section => {
  * @param {string} url The URL to shorten.
  * @return {Promise}
  */
-const shortenUrl = (url, callback) => {
+const shortenUrl = (url) => {
   return request({
     uri: URL_SHORTENER_BASE_URL,
     method: 'POST',
@@ -76,8 +79,9 @@ const shortenUrl = (url, callback) => {
     body: { longUrl: url },
     qs: { key: URL_SHORTENER_API_KEY },
     json: true
-  }).then(data => data.id)
-    .catch(error => errorBuilder.promise('URLShortenerAPIError', error))
+  }).then(data => data.id).catch(error => {
+    throw new NycurlError('URLShortenerAPIError', error)
+  })
 }
 
 /**
@@ -95,7 +99,7 @@ const fetchArticles = section => {
    */
   const currentTime = Date.now()
   if (cache[section] && currentTime < cache[section].expires) {
-    return Promise.resolve(cache[section].results)
+    return Promise.resolve(cache[section].articles)
   }
 
   /*
@@ -107,35 +111,35 @@ const fetchArticles = section => {
     uri: `${NYTIMES_URL}/${section}.json`,
     qs: { 'api-key': NYTIMES_API_KEY },
     json: true
-  }).then(data => {
+  }).catch(error => {
+    throw new NycurlError('NYTimesAPIError', error)
+  }).get('results').map(article => {
     /*
      * Some articles won't have a NYTimes short_url field, so we will shorten
      * the article URL ourselves.
      */
-    return Promise.all(data.results.map(article => {
-      if (article.short_url) {
-        return article
-      }
-      return shortenUrl(article.url).then(shortenedUrl => {
-        article.short_url = shortenedUrl
-        return article
-      })
-    }))
-  }).then(data => {
-    const results = data.sort((a, b) => a.section.localeCompare(b.section))
+    if (article.short_url) {
+      return article
+    }
+    return shortenUrl(article.url).then(shortenedUrl => {
+      article.short_url = shortenedUrl
+      return article
+    })
+  }).then(articles => {
+    articles = articles.sort((a, b) => a.section.localeCompare(b.section))
     /*
      * We cache the result and then return it through the Promise.
      */
     cache[section] = {
-      results: results,
+      articles: articles,
       expires: currentTime + CACHE_KEEP_TIME
     }
-    return results
+    return articles
   }).catch(error => {
-    return Promise.reject(new Error({
-      message: 'NYTimes API Failure',
-      error: error
-    }))
+    if (error instanceof NycurlError) {
+      throw error
+    }
+    throw new NycurlError('ArticleShorteningError', error)
   })
 }
 

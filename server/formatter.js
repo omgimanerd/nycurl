@@ -44,6 +44,7 @@ const WARNING = 'Warning: Using too small of a width will cause unpredictable \
 /**
  * This method returns the table footer that is appended to every output
  * Table.
+ * @param {number} colSpan The number of columns the footer should span.
  * @return {Array<Object>}
  */
 const getTableFooter = (colSpan) => {
@@ -66,19 +67,16 @@ const getTableFooter = (colSpan) => {
  * @return {string}
  */
 const formatTextWrap = (text, maxLineLength) => {
-  var words = text.split(' ')
-  var lineLength = 0
-  var output = ''
-  for (word of words) {
+  let lineLength = 0
+  return text.split(' ').reduce((result, word) => {
     if (lineLength + word.length >= maxLineLength) {
-      output += `\n${word} `
-      lineLength = word.length + 1
+      lineLength = word.length
+      return result + `\n${word}`
     } else {
-      output += `${word} `
-      lineLength += word.length + 1
+      lineLength += word.length + (result ? 1 : 0)
+      return result ? result + ` ${word}` : `${word}`
     }
-  }
-  return output
+  }, '')
 }
 
 /**
@@ -89,7 +87,7 @@ const formatTextWrap = (text, maxLineLength) => {
  * @return {string}
  */
 const formatHelp = (invalidSection) => {
-  var table = new Table()
+  const table = new Table()
   if (invalidSection) {
     table.push([{
       colSpan: 2,
@@ -133,15 +131,15 @@ const formatHelp = (invalidSection) => {
  * @return {string}
  */
 const formatArticles = (articles, options) => {
-  var maxWidth = parseInt(options['w'] || options['width'])
+  let maxWidth = parseInt(options['w'] || options['width'])
   if (isNaN(maxWidth) || maxWidth <= 0) {
     maxWidth = DEFAULT_DISPLAY_WIDTH
   }
-  var index = parseInt(options['i'] || options['index'])
+  let index = parseInt(options['i'] || options['index'])
   if (isNaN(index) || index < 0) {
     index = 0
   }
-  var number = parseInt(options['n'] || options['number'])
+  let number = parseInt(options['n'] || options['number'])
   if (isNaN(number) || number <= 0) {
     number = articles.length
   }
@@ -163,7 +161,7 @@ const formatArticles = (articles, options) => {
    * the space to the details column.
    */
   const detailsWidth = maxWidth - maxNumbersWidth - maxSectionsWidth - 4
-  var table = new Table({
+  const table = new Table({
     colWidths: [maxNumbersWidth, maxSectionsWidth, detailsWidth]
   })
   table.push([{
@@ -171,8 +169,8 @@ const formatArticles = (articles, options) => {
     content: HELP.red,
     hAlign: 'center'
   }], ['#'.red, 'Section'.red, 'Details'.red])
-  for (var article of articles) {
-    const section = new String(article.section).underline.cyan
+  articles.forEach((article) => {
+    const section = String(article.section).underline.cyan
     /**
      * We subtract 2 when calculating the space formatting for the text to
      * account for the padding at the edges of the table.
@@ -181,13 +179,13 @@ const formatArticles = (articles, options) => {
         article.title, detailsWidth - 2).bold.cyan
     const abstract = formatTextWrap(
         article.abstract, detailsWidth - 2)
-    const url = new String(article.short_url).underline.green
+    const url = String(article.short_url).underline.green
     table.push([
-      (index++).toString().blue,
+      String(index++).blue,
       section,
       [title, abstract, url].join('\n')
     ])
-  }
+  })
   table.push(getTableFooter(3))
   if (maxWidth < WIDTH_WARNING_THRESHOLD) {
     table.push([{
