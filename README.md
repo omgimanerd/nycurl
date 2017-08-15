@@ -2,7 +2,10 @@
 This is a web server that formats the latest news from the front page of the
 New York Times into a format that can be displayed in most terminals. A link
 to each article is included if the user wants to read the full article.
-To query news from other sources on the web, check out
+
+This project will no longer be updated or maintained as of August 2017. It
+will continue hosting this for as long as people are using it, but please
+consider using its sister project
 [getnews.tech](https://github.com/omgimanerd/getnews.tech).
 
 ## Example Output
